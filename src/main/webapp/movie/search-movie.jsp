@@ -4,6 +4,7 @@
 <%@ page import="com.movierental.model.movie.NewRelease" %>
 <%@ page import="com.movierental.model.movie.ClassicMovie" %>
 <%@ page import="java.util.List" %>
+<%@ page import="java.util.ArrayList" %>
 <%@ page import="java.text.SimpleDateFormat" %>
 <!DOCTYPE html>
 <html lang="en">

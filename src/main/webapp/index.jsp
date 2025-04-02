@@ -237,8 +237,8 @@
                             <a href="${pageContext.request.contextPath}/register" class="nav-link btn btn-neon">Sign Up</a>
                             <a href="${pageContext.request.contextPath}/login">Login</a>
                         <% } else { %>
-                            <a href="/search-movie" class="btn btn-neon">Browse Movies</a>
-                            <a href="/rental-history" class="btn btn-outline-light">My Rentals</a>
+                            <a href="${pageContext.request.contextPath}/search-movie" class="btn btn-neon">Browse Movies</a>
+                            <a href="${pageContext.request.contextPath}/rental-history" class="btn btn-outline-light">My Rentals</a>
                         <% } %>
                     </div>
                 </div>
