@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - Movie Rental System</title>
+    <title>Login - Movie Rental System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -69,9 +69,10 @@
             border-color: #550000;
         }
 
-        .text-neon {
-            color: #8a2be2;
-            text-shadow: 0 0 5px rgba(138, 43, 226, 0.7);
+        .alert-success {
+            background-color: #003300;
+            color: #66ff66;
+            border-color: #005500;
         }
 
         .link-neon {
@@ -110,7 +111,7 @@
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header text-center py-3">
-                        <h3 class="mb-0">Create Your Account</h3>
+                        <h3 class="mb-0">Login to Your Account</h3>
                     </div>
                     <div class="card-body p-4">
                         <% if(request.getAttribute("errorMessage") != null) { %>
@@ -119,39 +120,31 @@
                             </div>
                         <% } %>
 
-                        <form action="<%= request.getContextPath() %>/register" method="post">
+                        <% if(session.getAttribute("successMessage") != null) { %>
+                            <div class="alert alert-success">
+                                <%= session.getAttribute("successMessage") %>
+                                <% session.removeAttribute("successMessage"); %>
+                            </div>
+                        <% } %>
+
+                        <form action="<%= request.getContextPath() %>/login" method="post">
                             <div class="mb-3">
                                 <label for="username" class="form-label">Username</label>
                                 <input type="text" class="form-control" id="username" name="username" required>
                             </div>
 
-                            <div class="mb-3">
-                                <label for="fullName" class="form-label">Full Name</label>
-                                <input type="text" class="form-control" id="fullName" name="fullName" required>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Email Address</label>
-                                <input type="email" class="form-control" id="email" name="email" required>
-                            </div>
-
-                            <div class="mb-3">
+                            <div class="mb-4">
                                 <label for="password" class="form-label">Password</label>
                                 <input type="password" class="form-control" id="password" name="password" required>
                             </div>
 
-                            <div class="mb-4">
-                                <label for="confirmPassword" class="form-label">Confirm Password</label>
-                                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
-                            </div>
-
                             <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-primary py-2">Register</button>
+                                <button type="submit" class="btn btn-primary py-2">Login</button>
                             </div>
                         </form>
                     </div>
                     <div class="card-footer text-center py-3">
-                        <p class="mb-0">Already have an account? <a href="<%= request.getContextPath() %>/login" class="link-neon">Login here</a></p>
+                        <p class="mb-0">Don't have an account? <a href="<%= request.getContextPath() %>/register" class="link-neon">Register here</a></p>
                     </div>
                 </div>
 

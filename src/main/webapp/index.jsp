@@ -234,8 +234,8 @@
                     </p>
                     <div class="d-flex gap-3">
                         <% if (user == null) { %>
-                            <a href="/register" class="btn btn-neon">Get Started</a>
-                            <a href="/login" class="btn btn-outline-light">Login</a>
+                            <a href="${pageContext.request.contextPath}/register" class="nav-link btn btn-neon">Sign Up</a>
+                            <a href="${pageContext.request.contextPath}/login">Login</a>
                         <% } else { %>
                             <a href="/search-movie" class="btn btn-neon">Browse Movies</a>
                             <a href="/rental-history" class="btn btn-outline-light">My Rentals</a>

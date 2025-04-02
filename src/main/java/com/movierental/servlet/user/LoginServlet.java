@@ -46,6 +46,8 @@ public class LoginServlet extends HttpServlet {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
 
+        System.out.println("LoginServlet: Login attempt for user: " + username);
+
         // Validate input
         if (username == null || password == null ||
                 username.trim().isEmpty() || password.trim().isEmpty()) {
@@ -55,22 +57,36 @@ public class LoginServlet extends HttpServlet {
             return;
         }
 
-        // Create UserManager and attempt authentication
-        UserManager userManager = new UserManager();
-        User user = userManager.authenticateUser(username, password);
+        try {
+            // Create UserManager and attempt authentication
+            UserManager userManager = new UserManager(getServletContext());
+            User user = userManager.authenticateUser(username, password);
 
-        if (user != null) {
-            // Create session and add user
-            HttpSession session = request.getSession(true);
-            session.setAttribute("user", user);
-            session.setAttribute("userId", user.getUserId());
-            session.setAttribute("username", user.getUsername());
+            System.out.println("LoginServlet: Authentication result for " + username + ": " + (user != null ? "Success" : "Failed"));
 
-            // Redirect to home page
-            response.sendRedirect(request.getContextPath() + "/index.jsp");
-        } else {
-            // Authentication failed
-            request.setAttribute("errorMessage", "Invalid username or password");
+            if (user != null) {
+                // Create session and add user
+                HttpSession session = request.getSession(true);
+                session.setAttribute("user", user);
+                session.setAttribute("userId", user.getUserId());
+                session.setAttribute("username", user.getUsername());
+
+                System.out.println("LoginServlet: User logged in successfully: " + username);
+
+                // Redirect to home page
+                response.sendRedirect(request.getContextPath() + "/index.jsp");
+            } else {
+                // Authentication failed
+                System.out.println("LoginServlet: Authentication failed for user: " + username);
+                request.setAttribute("errorMessage", "Invalid username or password");
+                request.getRequestDispatcher("/user/login.jsp").forward(request, response);
+            }
+        } catch (Exception e) {
+            // Log any exceptions
+            System.err.println("LoginServlet: Exception occurred during login:");
+            e.printStackTrace();
+
+            request.setAttribute("errorMessage", "An error occurred during login: " + e.getMessage());
             request.getRequestDispatcher("/user/login.jsp").forward(request, response);
         }
     }

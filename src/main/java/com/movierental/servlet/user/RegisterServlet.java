@@ -39,7 +39,11 @@ public class RegisterServlet extends HttpServlet {
         String confirmPassword = request.getParameter("confirmPassword");
         String email = request.getParameter("email");
         String fullName = request.getParameter("fullName");
-        String userType = request.getParameter("userType");
+
+        // Debug logging
+        System.out.println("RegisterServlet: Processing registration for user: " + username);
+        System.out.println("RegisterServlet: Email: " + email);
+        System.out.println("RegisterServlet: Full Name: " + fullName);
 
         // Validate input
         if (username == null || password == null || email == null || fullName == null ||
@@ -59,7 +63,7 @@ public class RegisterServlet extends HttpServlet {
         }
 
         // Create UserManager
-        UserManager userManager = new UserManager();
+        UserManager userManager = new UserManager(getServletContext());
 
         // Check if username already exists
         if (userManager.getUserByUsername(username) != null) {
@@ -68,23 +72,34 @@ public class RegisterServlet extends HttpServlet {
             return;
         }
 
-        // Create new user
-        RegularUser newUser = new RegularUser();
-        newUser.setUsername(username);
-        newUser.setPassword(password);
-        newUser.setEmail(email);
-        newUser.setFullName(fullName);
+        try {
+            // Create new user
+            RegularUser newUser = new RegularUser();
+            newUser.setUsername(username);
+            newUser.setPassword(password);
+            newUser.setEmail(email);
+            newUser.setFullName(fullName);
 
-        // Add user
-        boolean success = userManager.addUser(newUser);
+            // Add user
+            boolean success = userManager.addUser(newUser);
 
-        if (success) {
-            // Set success message and redirect to login page
-            request.getSession().setAttribute("successMessage", "Registration successful! Please login.");
-            response.sendRedirect(request.getContextPath() + "/login");
-        } else {
-            // Set error message and go back to registration page
-            request.setAttribute("errorMessage", "Registration failed. Please try again.");
+            if (success) {
+                // Set success message and redirect to login page
+                System.out.println("RegisterServlet: Successfully registered user: " + username);
+                request.getSession().setAttribute("successMessage", "Registration successful! Please login.");
+                response.sendRedirect(request.getContextPath() + "/login");
+            } else {
+                // Set error message and go back to registration page
+                System.out.println("RegisterServlet: Failed to register user: " + username);
+                request.setAttribute("errorMessage", "Registration failed. Please try again.");
+                request.getRequestDispatcher("/user/register.jsp").forward(request, response);
+            }
+        } catch (Exception e) {
+            // Log any exceptions
+            System.err.println("RegisterServlet: Exception occurred during registration:");
+            e.printStackTrace();
+
+            request.setAttribute("errorMessage", "An error occurred during registration: " + e.getMessage());
             request.getRequestDispatcher("/user/register.jsp").forward(request, response);
         }
     }
