@@ -26,7 +26,8 @@ public class SearchMovieServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        MovieManager movieManager = new MovieManager();
+        // Create MovieManager with ServletContext for proper file path handling
+        MovieManager movieManager = new MovieManager(getServletContext());
         List<Movie> movies = new ArrayList<>();
 
         // Get search parameters
