@@ -14,6 +14,7 @@ import javax.servlet.http.HttpSession;
 
 import com.movierental.model.movie.Movie;
 import com.movierental.model.movie.MovieManager;
+import com.movierental.model.user.User;
 import com.movierental.model.watchlist.RecentlyWatched;
 import com.movierental.model.watchlist.Watchlist;
 import com.movierental.model.watchlist.WatchlistManager;
@@ -31,15 +32,22 @@ public class ViewWatchlistServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        System.out.println("ViewWatchlistServlet.doGet() called");
+
         // Check if user is logged in
         HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("userId") == null) {
+        User user = (session != null) ? (User) session.getAttribute("user") : null;
+
+        if (user == null) {
+            System.out.println("User not logged in, redirecting to login");
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
-        // Get user ID from session
-        String userId = (String) session.getAttribute("userId");
+        // Get user ID from user object
+        String userId = user.getUserId();
+        System.out.println("User ID: " + userId);
 
         // Get filter parameters
         String filter = request.getParameter("filter");
@@ -54,8 +62,10 @@ public class ViewWatchlistServlet extends HttpServlet {
             sort = "priority"; // priority, added-desc, added-asc
         }
 
-        // Get watchlist manager
-        WatchlistManager watchlistManager = new WatchlistManager();
+        System.out.println("Filter: " + filter + ", Sort: " + sort);
+
+        // Get watchlist manager with ServletContext
+        WatchlistManager watchlistManager = new WatchlistManager(getServletContext());
 
         // Get watchlist based on filter
         List<Watchlist> watchlist;
@@ -67,6 +77,8 @@ public class ViewWatchlistServlet extends HttpServlet {
             watchlist = watchlistManager.getWatchlistByUser(userId);
         }
 
+        System.out.println("Retrieved " + (watchlist != null ? watchlist.size() : 0) + " watchlist entries");
+
         // Sort watchlist
         if ("priority".equals(sort)) {
             watchlist = watchlistManager.sortByPriority(watchlist);
@@ -77,7 +89,7 @@ public class ViewWatchlistServlet extends HttpServlet {
         }
 
         // Get movie details for each watchlist item
-        MovieManager movieManager = new MovieManager();
+        MovieManager movieManager = new MovieManager(getServletContext());
         Map<String, Movie> movieMap = new HashMap<>();
 
         for (Watchlist item : watchlist) {
@@ -86,6 +98,8 @@ public class ViewWatchlistServlet extends HttpServlet {
                 Movie movie = movieManager.getMovieById(movieId);
                 if (movie != null) {
                     movieMap.put(movieId, movie);
+                } else {
+                    System.out.println("Warning: Movie not found for ID: " + movieId);
                 }
             }
         }
@@ -95,9 +109,13 @@ public class ViewWatchlistServlet extends HttpServlet {
         int unwatchedCount = watchlistManager.getUnwatchedCount(userId);
         int watchedCount = watchlistManager.getWatchedCount(userId);
 
+        System.out.println("Watchlist stats - Total: " + totalCount + ", Unwatched: " + unwatchedCount + ", Watched: " + watchedCount);
+
         // Get recently watched movies
         RecentlyWatched recentlyWatched = watchlistManager.getRecentlyWatched(userId);
         List<String> recentMovieIds = recentlyWatched.getMovieIds();
+
+        System.out.println("Retrieved " + recentMovieIds.size() + " recently watched movies");
 
         // Get movie details for recently watched
         for (String movieId : recentMovieIds) {
@@ -105,6 +123,8 @@ public class ViewWatchlistServlet extends HttpServlet {
                 Movie movie = movieManager.getMovieById(movieId);
                 if (movie != null) {
                     movieMap.put(movieId, movie);
+                } else {
+                    System.out.println("Warning: Recently watched movie not found for ID: " + movieId);
                 }
             }
         }
@@ -118,6 +138,8 @@ public class ViewWatchlistServlet extends HttpServlet {
         request.setAttribute("unwatchedCount", unwatchedCount);
         request.setAttribute("watchedCount", watchedCount);
         request.setAttribute("recentMovieIds", recentMovieIds);
+
+        System.out.println("Forwarding to watchlist.jsp");
 
         // Forward to watchlist JSP
         request.getRequestDispatcher("/watchlist/watchlist.jsp").forward(request, response);

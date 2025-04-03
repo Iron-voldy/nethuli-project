@@ -4,6 +4,7 @@
 <%@ page import="com.movierental.model.movie.NewRelease" %>
 <%@ page import="com.movierental.model.movie.ClassicMovie" %>
 <%@ page import="com.movierental.model.movie.MovieManager" %>
+<%@ page import="java.text.SimpleDateFormat" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -565,12 +566,13 @@
 
                         <% if(isNewRelease) {
                             NewRelease newRelease = (NewRelease) movie;
+                            SimpleDateFormat sdf = new SimpleDateFormat("MMMM dd, yyyy");
                         %>
                             <div class="special-info">
                                 <div class="special-info-title">
                                     <i class="bi bi-calendar-check"></i> New Release Information
                                 </div>
-                                <p>Release Date: <%= new SimpleDateFormat("MMMM dd, yyyy").format(newRelease.getReleaseDate()) %></p>
+                                <p>Release Date: <%= sdf.format(newRelease.getReleaseDate()) %></p>
                                 <p>
                                     Status:
                                     <% if(newRelease.isStillNewRelease()) { %>

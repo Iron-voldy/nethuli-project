@@ -3,6 +3,8 @@ package com.movierental.model.watchlist;
 import java.io.*;
 import java.util.*;
 
+import javax.servlet.ServletContext;
+
 import com.movierental.model.movie.Movie;
 import com.movierental.model.movie.MovieManager;
 
@@ -10,32 +12,78 @@ import com.movierental.model.movie.MovieManager;
  * WatchlistManager class handles all watchlist related operations
  */
 public class WatchlistManager {
-    private static final String WATCHLIST_FILE_PATH = "data/watchlists.txt";
-    private static final String RECENTLY_WATCHED_FILE_PATH = "data/recently_watched.txt";
+    private static final String WATCHLIST_FILE_NAME = "watchlists.txt";
+    private static final String RECENTLY_WATCHED_FILE_NAME = "recently_watched.txt";
 
+    private String watchlistFilePath;
+    private String recentlyWatchedFilePath;
     private List<Watchlist> watchlists;
     private Map<String, RecentlyWatched> recentlyWatchedMap; // userId -> RecentlyWatched
+    private ServletContext servletContext;
 
-    // Constructor
+    // Constructor without ServletContext
     public WatchlistManager() {
+        this(null);
+    }
+
+    // Constructor with ServletContext
+    public WatchlistManager(ServletContext servletContext) {
+        this.servletContext = servletContext;
         watchlists = new ArrayList<>();
         recentlyWatchedMap = new HashMap<>();
+        initializeFilePaths();
         loadWatchlists();
         loadRecentlyWatched();
     }
 
+    // Initialize file paths
+    private void initializeFilePaths() {
+        if (servletContext != null) {
+            // Use WEB-INF/data within the application context
+            String webInfDataPath = "/WEB-INF/data";
+            watchlistFilePath = servletContext.getRealPath(webInfDataPath) + File.separator + WATCHLIST_FILE_NAME;
+            recentlyWatchedFilePath = servletContext.getRealPath(webInfDataPath) + File.separator + RECENTLY_WATCHED_FILE_NAME;
+
+            // Ensure directories exist
+            File dataDir = new File(servletContext.getRealPath(webInfDataPath));
+            if (!dataDir.exists()) {
+                boolean created = dataDir.mkdirs();
+                System.out.println("Created WEB-INF/data directory: " + dataDir.getAbsolutePath() + " - Success: " + created);
+            }
+        } else {
+            // Fallback to simple data directory if not in web context
+            String dataPath = "data";
+            watchlistFilePath = dataPath + File.separator + WATCHLIST_FILE_NAME;
+            recentlyWatchedFilePath = dataPath + File.separator + RECENTLY_WATCHED_FILE_NAME;
+
+            // Ensure directories exist
+            File dataDir = new File(dataPath);
+            if (!dataDir.exists()) {
+                boolean created = dataDir.mkdirs();
+                System.out.println("Created fallback data directory: " + dataPath + " - Success: " + created);
+            }
+        }
+
+        System.out.println("WatchlistManager: Using watchlist file path: " + watchlistFilePath);
+        System.out.println("WatchlistManager: Using recently watched file path: " + recentlyWatchedFilePath);
+    }
+
     // Load watchlists from file
     private void loadWatchlists() {
-        File file = new File(WATCHLIST_FILE_PATH);
+        File file = new File(watchlistFilePath);
 
         // Create directory if it doesn't exist
-        file.getParentFile().mkdirs();
+        if (file.getParentFile() != null) {
+            file.getParentFile().mkdirs();
+        }
 
         if (!file.exists()) {
             try {
                 file.createNewFile();
+                System.out.println("Created new watchlists file: " + watchlistFilePath);
             } catch (IOException e) {
                 System.err.println("Error creating watchlists file: " + e.getMessage());
+                e.printStackTrace();
             }
             return;
         }
@@ -52,35 +100,43 @@ public class WatchlistManager {
                     watchlists.add(watchlist);
                 }
             }
+            System.out.println("Loaded " + watchlists.size() + " watchlist entries");
         } catch (IOException e) {
             System.err.println("Error loading watchlists: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
     // Save watchlists to file
     private void saveWatchlists() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(WATCHLIST_FILE_PATH))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(watchlistFilePath))) {
             for (Watchlist watchlist : watchlists) {
                 writer.write(watchlist.toFileString());
                 writer.newLine();
             }
+            System.out.println("Saved " + watchlists.size() + " watchlist entries");
         } catch (IOException e) {
             System.err.println("Error saving watchlists: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
     // Load recently watched from file
     private void loadRecentlyWatched() {
-        File file = new File(RECENTLY_WATCHED_FILE_PATH);
+        File file = new File(recentlyWatchedFilePath);
 
         // Create directory if it doesn't exist
-        file.getParentFile().mkdirs();
+        if (file.getParentFile() != null) {
+            file.getParentFile().mkdirs();
+        }
 
         if (!file.exists()) {
             try {
                 file.createNewFile();
+                System.out.println("Created new recently watched file: " + recentlyWatchedFilePath);
             } catch (IOException e) {
                 System.err.println("Error creating recently watched file: " + e.getMessage());
+                e.printStackTrace();
             }
             return;
         }
@@ -97,36 +153,44 @@ public class WatchlistManager {
                     recentlyWatchedMap.put(recentlyWatched.getUserId(), recentlyWatched);
                 }
             }
+            System.out.println("Loaded " + recentlyWatchedMap.size() + " recently watched entries");
         } catch (IOException e) {
             System.err.println("Error loading recently watched: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
     // Save recently watched to file
     private void saveRecentlyWatched() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(RECENTLY_WATCHED_FILE_PATH))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(recentlyWatchedFilePath))) {
             for (RecentlyWatched recentlyWatched : recentlyWatchedMap.values()) {
                 writer.write(recentlyWatched.toFileString());
                 writer.newLine();
             }
+            System.out.println("Saved " + recentlyWatchedMap.size() + " recently watched entries");
         } catch (IOException e) {
             System.err.println("Error saving recently watched: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
     // Add a movie to watchlist
     public Watchlist addToWatchlist(String userId, String movieId, int priority, String notes) {
+        System.out.println("Adding to watchlist - User ID: " + userId + ", Movie ID: " + movieId);
+
         // Check if movie exists
-        MovieManager movieManager = new MovieManager();
+        MovieManager movieManager = new MovieManager(servletContext);
         Movie movie = movieManager.getMovieById(movieId);
 
         if (movie == null) {
+            System.out.println("Movie not found: " + movieId);
             return null; // Movie doesn't exist
         }
 
         // Check if already in watchlist
         for (Watchlist watchlist : watchlists) {
             if (watchlist.getUserId().equals(userId) && watchlist.getMovieId().equals(movieId)) {
+                System.out.println("Movie already in watchlist");
                 return watchlist; // Already in watchlist
             }
         }
@@ -146,6 +210,7 @@ public class WatchlistManager {
         watchlists.add(watchlist);
         saveWatchlists();
 
+        System.out.println("Added to watchlist successfully");
         return watchlist;
     }
 
@@ -368,5 +433,16 @@ public class WatchlistManager {
             }
         }
         return count;
+    }
+
+    // Set ServletContext (can be used to update the context after initialization)
+    public void setServletContext(ServletContext servletContext) {
+        this.servletContext = servletContext;
+        initializeFilePaths();
+        // Reload data with the new file paths
+        watchlists.clear();
+        recentlyWatchedMap.clear();
+        loadWatchlists();
+        loadRecentlyWatched();
     }
 }
