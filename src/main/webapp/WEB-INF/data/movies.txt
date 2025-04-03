@@ -1,0 +1,1 @@
+REGULAR,4c33b873-97ec-4ddd-b4c1-f42df820141e,Nelum Kuluna,Ilango Ramanathan,Comedy,2025,8.0,true,movie_images/4c33b873-97ec-4ddd-b4c1-f42df820141e.jpg
