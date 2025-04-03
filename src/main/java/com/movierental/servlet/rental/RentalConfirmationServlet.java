@@ -20,53 +20,60 @@ public class RentalConfirmationServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Check if user is logged in
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("userId") == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
-        // Get transaction ID from session
+        // Enhanced retrieval and logging
         String transactionId = (String) session.getAttribute("lastTransactionId");
         String movieId = (String) session.getAttribute("lastRentalMovieId");
         Integer rentalDays = (Integer) session.getAttribute("lastRentalDays");
 
-        System.out.println("RentalConfirmationServlet: TransactionID: " + transactionId);
-        System.out.println("RentalConfirmationServlet: MovieID: " + movieId);
-        System.out.println("RentalConfirmationServlet: RentalDays: " + rentalDays);
+        System.out.println("RentalConfirmation: Transaction ID: " + transactionId);
+        System.out.println("RentalConfirmation: Movie ID: " + movieId);
+        System.out.println("RentalConfirmation: Rental Days: " + rentalDays);
 
+        // Validation checks
         if (transactionId == null || movieId == null || rentalDays == null) {
-            System.out.println("RentalConfirmationServlet: Missing session attributes");
+            System.out.println("RentalConfirmation: Missing session attributes");
             response.sendRedirect(request.getContextPath() + "/rental-history");
             return;
         }
 
-        // Create managers
-        RentalManager rentalManager = new RentalManager();
-        MovieManager movieManager = new MovieManager(getServletContext());
+        try {
+            // Managers with ServletContext
+            RentalManager rentalManager = new RentalManager();
+            MovieManager movieManager = new MovieManager(getServletContext());
 
-        // Get transaction details
-        Transaction transaction = rentalManager.getTransactionById(transactionId);
-        Movie movie = movieManager.getMovieById(movieId);
+            // Retrieve transaction and movie details
+            Transaction transaction = rentalManager.getTransactionById(transactionId);
+            Movie movie = movieManager.getMovieById(movieId);
 
-        if (transaction == null || movie == null) {
-            System.out.println("RentalConfirmationServlet: Transaction or Movie not found");
+            // Additional validation
+            if (transaction == null || movie == null) {
+                System.out.println("RentalConfirmation: Transaction or Movie not found");
+                response.sendRedirect(request.getContextPath() + "/rental-history");
+                return;
+            }
+
+            // Set attributes for confirmation page
+            request.setAttribute("transaction", transaction);
+            request.setAttribute("movie", movie);
+            request.setAttribute("rentalDays", rentalDays);
+
+            // Remove transaction details from session
+            session.removeAttribute("lastTransactionId");
+            session.removeAttribute("lastRentalMovieId");
+            session.removeAttribute("lastRentalDays");
+
+            // Forward to confirmation page
+            request.getRequestDispatcher("/rental/rental-confirmation.jsp").forward(request, response);
+
+        } catch (Exception e) {
+            e.printStackTrace();
             response.sendRedirect(request.getContextPath() + "/rental-history");
-            return;
         }
-
-        // Set attributes for confirmation page
-        request.setAttribute("transaction", transaction);
-        request.setAttribute("movie", movie);
-        request.setAttribute("rentalDays", rentalDays);
-
-        // Remove transaction details from session
-        session.removeAttribute("lastTransactionId");
-        session.removeAttribute("lastRentalMovieId");
-        session.removeAttribute("lastRentalDays");
-
-        // Forward to confirmation page
-        request.getRequestDispatcher("/rental/rental-confirmation.jsp").forward(request, response);
     }
 }
