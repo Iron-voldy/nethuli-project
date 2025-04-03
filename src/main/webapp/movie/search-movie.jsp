@@ -3,6 +3,7 @@
 <%@ page import="com.movierental.model.movie.Movie" %>
 <%@ page import="com.movierental.model.movie.NewRelease" %>
 <%@ page import="com.movierental.model.movie.ClassicMovie" %>
+<%@ page import="com.movierental.model.movie.MovieManager" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.text.SimpleDateFormat" %>
@@ -15,6 +16,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
+        /* Keep all existing CSS styles */
         :root {
             --neon-blue: #00c8ff;
             --neon-purple: #8a2be2;
@@ -215,13 +217,30 @@
         }
 
         .movie-poster {
-            height: 200px;
+            height: 300px;
             background: linear-gradient(135deg, #333, #222);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .movie-poster img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .movie-card:hover .movie-poster img {
+            transform: scale(1.05);
+        }
+
+        .movie-poster .poster-placeholder {
             display: flex;
             align-items: center;
             justify-content: center;
             color: #555;
             font-size: 3rem;
+            height: 100%;
         }
 
         .movie-info {
@@ -341,6 +360,7 @@
             width: 15px;
             height: 15px;
             border-radius: 50%;
+            z-index: 2;
         }
 
         .available {
@@ -371,6 +391,9 @@
         if (searchQuery == null) searchQuery = "";
         if (searchType == null) searchType = "title";
         if (movies == null) movies = new ArrayList<Movie>();
+
+        // Create MovieManager to get image URLs
+        MovieManager movieManager = new MovieManager(application);
     %>
 
     <!-- Navigation Bar -->
@@ -495,12 +518,20 @@
                     boolean isClassic = movie instanceof ClassicMovie;
                     boolean hasAwards = isClassic && ((ClassicMovie)movie).hasAwards();
                     String movieType = isNewRelease ? "New Release" : (isClassic ? "Classic" : "Regular");
+
+                    // Get cover photo URL if available
+                    String coverPhotoUrl = movieManager.getCoverPhotoUrl(movie);
+                    boolean hasCoverPhoto = coverPhotoUrl != null && !coverPhotoUrl.isEmpty();
                 %>
                     <div class="movie-card">
-                        <div class="position-relative">
-                            <div class="movie-poster">
-                                <i class="bi bi-film"></i>
-                            </div>
+                        <div class="movie-poster">
+                            <% if(hasCoverPhoto) { %>
+                                <img src="<%= request.getContextPath() %>/image-servlet?movieId=<%= movie.getMovieId() %>" alt="<%= movie.getTitle() %>">
+                            <% } else { %>
+                                <div class="poster-placeholder">
+                                    <i class="bi bi-film"></i>
+                                </div>
+                            <% } %>
                             <div class="availability-indicator <%= movie.isAvailable() ? "available" : "unavailable" %>"></div>
                         </div>
                         <div class="movie-info">

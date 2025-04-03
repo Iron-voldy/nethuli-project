@@ -1,8 +1,9 @@
+/**
+ * Step 1: Update Movie class to include cover photo path
+ * File: src/main/java/com/movierental/model/movie/Movie.java
+ */
 package com.movierental.model.movie;
 
-/**
- * Base Movie class representing common movie attributes and behaviors
- */
 public class Movie {
     private String movieId;
     private String title;
@@ -11,9 +12,11 @@ public class Movie {
     private int releaseYear;
     private double rating;
     private boolean available;
+    private String coverPhotoPath; // New field for cover photo
 
-    // Constructor with all fields
-    public Movie(String movieId, String title, String director, String genre, int releaseYear, double rating, boolean available) {
+    // Constructor with all fields including cover photo
+    public Movie(String movieId, String title, String director, String genre, int releaseYear,
+                 double rating, boolean available, String coverPhotoPath) {
         this.movieId = movieId;
         this.title = title;
         this.director = director;
@@ -21,6 +24,13 @@ public class Movie {
         this.releaseYear = releaseYear;
         this.rating = rating;
         this.available = available;
+        this.coverPhotoPath = coverPhotoPath;
+    }
+
+    // Constructor without cover photo (set default empty path)
+    public Movie(String movieId, String title, String director, String genre, int releaseYear,
+                 double rating, boolean available) {
+        this(movieId, title, director, genre, releaseYear, rating, available, "");
     }
 
     // Default constructor
@@ -32,9 +42,10 @@ public class Movie {
         this.releaseYear = 0;
         this.rating = 0.0;
         this.available = true;
+        this.coverPhotoPath = "";
     }
 
-    // Getters and setters
+    // Getters and setters (existing ones unchanged)
     public String getMovieId() {
         return movieId;
     }
@@ -91,21 +102,30 @@ public class Movie {
         this.available = available;
     }
 
+    // New getter and setter for coverPhotoPath
+    public String getCoverPhotoPath() {
+        return coverPhotoPath;
+    }
+
+    public void setCoverPhotoPath(String coverPhotoPath) {
+        this.coverPhotoPath = coverPhotoPath;
+    }
+
     // Calculate rental price (to be overridden by subclasses)
     public double calculateRentalPrice(int daysRented) {
         return 3.99 * daysRented; // Base rental price
     }
 
-    // Convert movie to string representation for file storage
+    // Update toFileString to include cover photo path
     public String toFileString() {
         return "REGULAR," + movieId + "," + title + "," + director + "," +
-                genre + "," + releaseYear + "," + rating + "," + available;
+                genre + "," + releaseYear + "," + rating + "," + available + "," + coverPhotoPath;
     }
 
-    // Create movie from string representation (from file)
+    // Update fromFileString to handle cover photo path
     public static Movie fromFileString(String fileString) {
         String[] parts = fileString.split(",");
-        if (parts.length >= 8) {
+        if (parts.length >= 9) { // Updated to check for at least 9 parts
             Movie movie = new Movie();
             movie.setMovieId(parts[1]);
             movie.setTitle(parts[2]);
@@ -114,6 +134,7 @@ public class Movie {
             movie.setReleaseYear(Integer.parseInt(parts[5]));
             movie.setRating(Double.parseDouble(parts[6]));
             movie.setAvailable(Boolean.parseBoolean(parts[7]));
+            movie.setCoverPhotoPath(parts[8]); // Add cover photo path
             return movie;
         }
         return null;
@@ -129,6 +150,7 @@ public class Movie {
                 ", releaseYear=" + releaseYear +
                 ", rating=" + rating +
                 ", available=" + available +
+                ", coverPhotoPath='" + coverPhotoPath + '\'' +
                 '}';
     }
 }

@@ -9,6 +9,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
+        /* Keep all the existing CSS styles */
         :root {
             --neon-blue: #00c8ff;
             --neon-purple: #8a2be2;
@@ -214,6 +215,75 @@
             display: inline-block;
             box-shadow: 0 0 15px rgba(0, 200, 255, 0.3);
         }
+
+        /* New styles for file upload */
+        .cover-photo-preview {
+            width: 100%;
+            height: 300px;
+            border-radius: 8px;
+            border: 2px dashed #444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            overflow: hidden;
+            position: relative;
+            background-color: #2d2d2d;
+        }
+
+        .cover-photo-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .cover-photo-preview .placeholder-icon {
+            font-size: 4rem;
+            color: #555;
+        }
+
+        .file-input-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .file-input-container input[type="file"] {
+            opacity: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input-label {
+            display: block;
+            background-color: var(--input-bg);
+            border: 1px solid var(--input-border);
+            color: var(--text-primary);
+            border-radius: 8px;
+            padding: 10px 15px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .file-input-label:hover {
+            background-color: #3a3a3a;
+        }
+
+        .file-input-label i {
+            margin-right: 8px;
+        }
+
+        .selected-file-name {
+            margin-top: 5px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
     </style>
 </head>
 <body>
@@ -287,51 +357,69 @@
                             </div>
                         <% } %>
 
-                        <form action="<%= request.getContextPath() %>/add-movie" method="post">
-                            <!-- Basic Movie Information -->
+                        <form action="<%= request.getContextPath() %>/add-movie" method="post" enctype="multipart/form-data">
                             <div class="row">
-                                <div class="col-md-12 mb-3">
-                                    <label for="title" class="form-label">Movie Title</label>
-                                    <input type="text" class="form-control" id="title" name="title" required>
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="director" class="form-label">Director</label>
-                                    <input type="text" class="form-control" id="director" name="director" required>
-                                </div>
-
-                                <div class="col-md-6 mb-3">
-                                    <label for="genre" class="form-label">Genre</label>
-                                    <select class="form-select" id="genre" name="genre" required>
-                                        <option value="" selected disabled>Select genre</option>
-                                        <option value="Action">Action</option>
-                                        <option value="Adventure">Adventure</option>
-                                        <option value="Comedy">Comedy</option>
-                                        <option value="Drama">Drama</option>
-                                        <option value="Fantasy">Fantasy</option>
-                                        <option value="Horror">Horror</option>
-                                        <option value="Mystery">Mystery</option>
-                                        <option value="Romance">Romance</option>
-                                        <option value="Science Fiction">Science Fiction</option>
-                                        <option value="Thriller">Thriller</option>
-                                        <option value="Western">Western</option>
-                                        <option value="Documentary">Documentary</option>
-                                        <option value="Animation">Animation</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="releaseYear" class="form-label">Release Year</label>
-                                    <input type="number" class="form-control" id="releaseYear" name="releaseYear" min="1900" max="2099" required>
+                                <div class="col-md-6">
+                                    <!-- Cover Photo Upload Section -->
+                                    <div class="mb-4">
+                                        <label class="form-label">Movie Cover Photo</label>
+                                        <div class="cover-photo-preview" id="coverPhotoPreview">
+                                            <i class="bi bi-image placeholder-icon"></i>
+                                        </div>
+                                        <div class="file-input-container">
+                                            <label class="file-input-label">
+                                                <i class="bi bi-upload"></i> Choose Cover Photo
+                                                <input type="file" name="coverPhoto" id="coverPhotoInput" accept="image/*">
+                                            </label>
+                                            <div class="selected-file-name" id="selectedFileName">No file selected</div>
+                                        </div>
+                                        <div class="form-text">Recommended size: 300x450 pixels, Max file size: 5MB</div>
+                                    </div>
                                 </div>
 
-                                <div class="col-md-6 mb-3">
-                                    <label for="rating" class="form-label">Rating (0-10)</label>
-                                    <input type="number" class="form-control" id="rating" name="rating" min="0" max="10" step="0.1" required>
+                                <div class="col-md-6">
+                                    <!-- Basic Movie Information -->
+                                    <div class="mb-3">
+                                        <label for="title" class="form-label">Movie Title</label>
+                                        <input type="text" class="form-control" id="title" name="title" required>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="director" class="form-label">Director</label>
+                                        <input type="text" class="form-control" id="director" name="director" required>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="genre" class="form-label">Genre</label>
+                                        <select class="form-select" id="genre" name="genre" required>
+                                            <option value="" selected disabled>Select genre</option>
+                                            <option value="Action">Action</option>
+                                            <option value="Adventure">Adventure</option>
+                                            <option value="Comedy">Comedy</option>
+                                            <option value="Drama">Drama</option>
+                                            <option value="Fantasy">Fantasy</option>
+                                            <option value="Horror">Horror</option>
+                                            <option value="Mystery">Mystery</option>
+                                            <option value="Romance">Romance</option>
+                                            <option value="Science Fiction">Science Fiction</option>
+                                            <option value="Thriller">Thriller</option>
+                                            <option value="Western">Western</option>
+                                            <option value="Documentary">Documentary</option>
+                                            <option value="Animation">Animation</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="releaseYear" class="form-label">Release Year</label>
+                                            <input type="number" class="form-control" id="releaseYear" name="releaseYear" min="1900" max="2099" required>
+                                        </div>
+
+                                        <div class="col-md-6 mb-3">
+                                            <label for="rating" class="form-label">Rating (0-10)</label>
+                                            <input type="number" class="form-control" id="rating" name="rating" min="0" max="10" step="0.1" required>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -421,6 +509,37 @@
             // Add event listeners to radio buttons
             typeRadios.forEach(radio => {
                 radio.addEventListener('change', updateFields);
+            });
+
+            // Handle cover photo preview
+            const coverPhotoInput = document.getElementById('coverPhotoInput');
+            const coverPhotoPreview = document.getElementById('coverPhotoPreview');
+            const selectedFileName = document.getElementById('selectedFileName');
+
+            coverPhotoInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    const file = this.files[0];
+                    const reader = new FileReader();
+
+                    reader.onload = function(e) {
+                        // Clear the preview
+                        coverPhotoPreview.innerHTML = '';
+
+                        // Create image element
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        coverPhotoPreview.appendChild(img);
+
+                        // Update file name display
+                        selectedFileName.textContent = file.name;
+                    };
+
+                    reader.readAsDataURL(file);
+                } else {
+                    // Reset to placeholder
+                    coverPhotoPreview.innerHTML = '<i class="bi bi-image placeholder-icon"></i>';
+                    selectedFileName.textContent = 'No file selected';
+                }
             });
         });
     </script>

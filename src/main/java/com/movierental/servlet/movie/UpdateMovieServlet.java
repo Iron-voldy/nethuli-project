@@ -1,15 +1,22 @@
+/**
+ * Step 7: Update UpdateMovieServlet to handle file uploads
+ * File: src/main/java/com/movierental/servlet/movie/UpdateMovieServlet.java
+ */
 package com.movierental.servlet.movie;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
 
 import com.movierental.model.movie.ClassicMovie;
 import com.movierental.model.movie.Movie;
@@ -17,9 +24,14 @@ import com.movierental.model.movie.MovieManager;
 import com.movierental.model.movie.NewRelease;
 
 /**
- * Servlet for handling movie updates
+ * Servlet for handling movie updates with file uploads
  */
 @WebServlet("/update-movie")
+@MultipartConfig(
+        fileSizeThreshold = 1024 * 1024, // 1 MB
+        maxFileSize = 5 * 1024 * 1024,   // 5 MB
+        maxRequestSize = 10 * 1024 * 1024 // 10 MB
+)
 public class UpdateMovieServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
@@ -38,7 +50,7 @@ public class UpdateMovieServlet extends HttpServlet {
         }
 
         // Get movie from database
-        MovieManager movieManager = new MovieManager();
+        MovieManager movieManager = new MovieManager(getServletContext());
         Movie movie = movieManager.getMovieById(movieId);
 
         if (movie == null) {
@@ -64,7 +76,7 @@ public class UpdateMovieServlet extends HttpServlet {
     }
 
     /**
-     * Handles POST requests - process the edit movie form
+     * Handles POST requests - process the edit movie form with file upload
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -83,6 +95,15 @@ public class UpdateMovieServlet extends HttpServlet {
         String releaseDateStr = request.getParameter("releaseDate");
         String significance = request.getParameter("significance");
         String hasAwardsStr = request.getParameter("hasAwards");
+
+        // Get the cover photo file part
+        Part coverPhotoPart = null;
+        try {
+            coverPhotoPart = request.getPart("coverPhoto");
+        } catch (Exception e) {
+            // Part not found or not a multipart request
+            getServletContext().log("Error getting coverPhoto part: " + e.getMessage());
+        }
 
         // Validate required fields
         if (movieId == null || title == null || director == null || genre == null ||
@@ -110,7 +131,7 @@ public class UpdateMovieServlet extends HttpServlet {
             }
 
             // Create MovieManager
-            MovieManager movieManager = new MovieManager();
+            MovieManager movieManager = new MovieManager(getServletContext());
 
             // Get existing movie
             Movie existingMovie = movieManager.getMovieById(movieId);
@@ -119,6 +140,25 @@ public class UpdateMovieServlet extends HttpServlet {
                 request.getSession().setAttribute("errorMessage", "Movie not found");
                 response.sendRedirect(request.getContextPath() + "/search-movie");
                 return;
+            }
+
+            // Get cover photo input stream and file name if available
+            InputStream coverPhotoStream = null;
+            String originalFileName = null;
+
+            if (coverPhotoPart != null && coverPhotoPart.getSize() > 0) {
+                coverPhotoStream = coverPhotoPart.getInputStream();
+                String contentDisposition = coverPhotoPart.getHeader("content-disposition");
+                if (contentDisposition != null) {
+                    // Extract file name from content-disposition header
+                    for (String part : contentDisposition.split(";")) {
+                        part = part.trim();
+                        if (part.startsWith("filename=")) {
+                            originalFileName = part.substring(part.indexOf("=") + 1).replace("\"", "");
+                            break;
+                        }
+                    }
+                }
             }
 
             // Create updated movie based on type
@@ -197,8 +237,13 @@ public class UpdateMovieServlet extends HttpServlet {
                     break;
             }
 
-            // Update movie in database
-            boolean success = movieManager.updateMovie(updatedMovie);
+            // Update movie in database with the cover photo if provided
+            boolean success = movieManager.updateMovie(updatedMovie, coverPhotoStream, originalFileName);
+
+            // Close the input stream if it was opened
+            if (coverPhotoStream != null) {
+                coverPhotoStream.close();
+            }
 
             if (success) {
                 // Set success message

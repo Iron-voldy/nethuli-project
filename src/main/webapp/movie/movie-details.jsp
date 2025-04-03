@@ -96,17 +96,29 @@
         }
 
         .movie-poster {
-            width: 180px;
-            height: 260px;
+            width: 250px;
+            height: 375px;
             background: linear-gradient(135deg, #333, #222);
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            margin-right: 30px;
+        }
+
+        .movie-poster img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .poster-placeholder {
+            width: 100%;
+            height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
             color: #555;
             font-size: 4rem;
-            margin-right: 30px;
         }
 
         .movie-title {
@@ -334,7 +346,7 @@
         }
 
         // Get movie from database
-        MovieManager movieManager = new MovieManager();
+        MovieManager movieManager = new MovieManager(application);
         Movie movie = movieManager.getMovieById(movieId);
 
         if (movie == null) {
@@ -345,6 +357,10 @@
         boolean isNewRelease = movie instanceof NewRelease;
         boolean isClassic = movie instanceof ClassicMovie;
         boolean hasAwards = isClassic && ((ClassicMovie)movie).hasAwards();
+
+        // Check if the movie has a cover photo
+        String coverPhotoUrl = movieManager.getCoverPhotoUrl(movie);
+        boolean hasCoverPhoto = movie.getCoverPhotoPath() != null && !movie.getCoverPhotoPath().isEmpty();
     %>
 
     <!-- Navigation Bar -->
@@ -397,7 +413,13 @@
         <!-- Movie Header -->
         <div class="movie-header d-flex">
             <div class="movie-poster">
-                <i class="bi bi-film"></i>
+                <% if(hasCoverPhoto) { %>
+                    <img src="<%= request.getContextPath() %>/image-servlet?movieId=<%= movie.getMovieId() %>" alt="<%= movie.getTitle() %>">
+                <% } else { %>
+                    <div class="poster-placeholder">
+                        <i class="bi bi-film"></i>
+                    </div>
+                <% } %>
             </div>
             <div class="movie-info">
                 <h1 class="movie-title"><%= movie.getTitle() %></h1>

@@ -1,3 +1,7 @@
+/**
+ * Step 3: Update ClassicMovie class to include cover photo path
+ * File: src/main/java/com/movierental/model/movie/ClassicMovie.java
+ */
 package com.movierental.model.movie;
 
 /**
@@ -7,7 +11,16 @@ public class ClassicMovie extends Movie {
     private String significance; // Historical or cultural significance
     private boolean hasAwards;   // Whether the movie has won major awards
 
-    // Constructor with all fields
+    // Constructor with all fields including cover photo
+    public ClassicMovie(String movieId, String title, String director, String genre,
+                        int releaseYear, double rating, boolean available,
+                        String significance, boolean hasAwards, String coverPhotoPath) {
+        super(movieId, title, director, genre, releaseYear, rating, available, coverPhotoPath);
+        this.significance = significance;
+        this.hasAwards = hasAwards;
+    }
+
+    // Constructor without cover photo
     public ClassicMovie(String movieId, String title, String director, String genre,
                         int releaseYear, double rating, boolean available,
                         String significance, boolean hasAwards) {
@@ -67,7 +80,7 @@ public class ClassicMovie extends Movie {
     public String toFileString() {
         return "CLASSIC," + getMovieId() + "," + getTitle() + "," + getDirector() + "," +
                 getGenre() + "," + getReleaseYear() + "," + getRating() + "," +
-                isAvailable() + "," + significance + "," + hasAwards;
+                isAvailable() + "," + significance + "," + hasAwards + "," + getCoverPhotoPath();
     }
 
     // Create ClassicMovie from string representation (from file)
@@ -84,6 +97,12 @@ public class ClassicMovie extends Movie {
             movie.setAvailable(Boolean.parseBoolean(parts[7]));
             movie.setSignificance(parts[8]);
             movie.setHasAwards(Boolean.parseBoolean(parts[9]));
+
+            // Handle cover photo path if available
+            if (parts.length > 10) {
+                movie.setCoverPhotoPath(parts[10]);
+            }
+
             return movie;
         }
         return null;

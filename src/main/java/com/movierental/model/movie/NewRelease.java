@@ -1,3 +1,7 @@
+/**
+ * Step 4: Update NewRelease class to include cover photo path
+ * File: src/main/java/com/movierental/model/movie/NewRelease.java
+ */
 package com.movierental.model.movie;
 
 import java.util.Date;
@@ -8,7 +12,15 @@ import java.util.Date;
 public class NewRelease extends Movie {
     private Date releaseDate;
 
-    // Constructor with all fields
+    // Constructor with all fields including cover photo
+    public NewRelease(String movieId, String title, String director, String genre,
+                      int releaseYear, double rating, boolean available, Date releaseDate,
+                      String coverPhotoPath) {
+        super(movieId, title, director, genre, releaseYear, rating, available, coverPhotoPath);
+        this.releaseDate = releaseDate;
+    }
+
+    // Constructor with all fields without cover photo
     public NewRelease(String movieId, String title, String director, String genre,
                       int releaseYear, double rating, boolean available, Date releaseDate) {
         super(movieId, title, director, genre, releaseYear, rating, available);
@@ -53,7 +65,7 @@ public class NewRelease extends Movie {
     public String toFileString() {
         return "NEW_RELEASE," + getMovieId() + "," + getTitle() + "," + getDirector() + "," +
                 getGenre() + "," + getReleaseYear() + "," + getRating() + "," +
-                isAvailable() + "," + releaseDate.getTime();
+                isAvailable() + "," + releaseDate.getTime() + "," + getCoverPhotoPath();
     }
 
     // Create NewRelease from string representation (from file)
@@ -69,6 +81,12 @@ public class NewRelease extends Movie {
             movie.setRating(Double.parseDouble(parts[6]));
             movie.setAvailable(Boolean.parseBoolean(parts[7]));
             movie.setReleaseDate(new Date(Long.parseLong(parts[8])));
+
+            // Handle cover photo path if available
+            if (parts.length > 9) {
+                movie.setCoverPhotoPath(parts[9]);
+            }
+
             return movie;
         }
         return null;

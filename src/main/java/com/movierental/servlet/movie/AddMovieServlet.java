@@ -1,15 +1,22 @@
+/**
+ * Step 6: Update AddMovieServlet to handle file uploads
+ * File: src/main/java/com/movierental/servlet/movie/AddMovieServlet.java
+ */
 package com.movierental.servlet.movie;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
 
 import com.movierental.model.movie.ClassicMovie;
 import com.movierental.model.movie.Movie;
@@ -18,8 +25,14 @@ import com.movierental.model.movie.NewRelease;
 
 /**
  * Servlet for handling movie addition
+ * Added MultipartConfig to handle file uploads
  */
 @WebServlet("/add-movie")
+@MultipartConfig(
+        fileSizeThreshold = 1024 * 1024, // 1 MB
+        maxFileSize = 5 * 1024 * 1024,   // 5 MB
+        maxRequestSize = 10 * 1024 * 1024 // 10 MB
+)
 public class AddMovieServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
@@ -34,7 +47,7 @@ public class AddMovieServlet extends HttpServlet {
     }
 
     /**
-     * Handles POST requests - process the add movie form
+     * Handles POST requests - process the add movie form with file upload
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -51,6 +64,15 @@ public class AddMovieServlet extends HttpServlet {
         String releaseDateStr = request.getParameter("releaseDate");
         String significance = request.getParameter("significance");
         String hasAwardsStr = request.getParameter("hasAwards");
+
+        // Get the cover photo file part
+        Part coverPhotoPart = null;
+        try {
+            coverPhotoPart = request.getPart("coverPhoto");
+        } catch (Exception e) {
+            // Part not found or not a multipart request
+            getServletContext().log("Error getting coverPhoto part: " + e.getMessage());
+        }
 
         // Validate required fields
         if (title == null || director == null || genre == null ||
@@ -75,8 +97,27 @@ public class AddMovieServlet extends HttpServlet {
                 return;
             }
 
-            // Create MovieManager
-            MovieManager movieManager = new MovieManager();
+            // Create MovieManager with ServletContext
+            MovieManager movieManager = new MovieManager(getServletContext());
+
+            // Get cover photo input stream and file name if available
+            InputStream coverPhotoStream = null;
+            String originalFileName = null;
+
+            if (coverPhotoPart != null && coverPhotoPart.getSize() > 0) {
+                coverPhotoStream = coverPhotoPart.getInputStream();
+                String contentDisposition = coverPhotoPart.getHeader("content-disposition");
+                if (contentDisposition != null) {
+                    // Extract file name from content-disposition header
+                    for (String part : contentDisposition.split(";")) {
+                        part = part.trim();
+                        if (part.startsWith("filename=")) {
+                            originalFileName = part.substring(part.indexOf("=") + 1).replace("\"", "");
+                            break;
+                        }
+                    }
+                }
+            }
 
             // Create movie based on type
             Movie movie = null;
@@ -92,7 +133,10 @@ public class AddMovieServlet extends HttpServlet {
                         }
                     }
 
-                    NewRelease newRelease = movieManager.addNewRelease(title, director, genre, releaseYear, rating);
+                    NewRelease newRelease = movieManager.addNewRelease(
+                            title, director, genre, releaseYear, rating,
+                            coverPhotoStream, originalFileName);
+
                     newRelease.setReleaseDate(releaseDate);
                     movieManager.updateMovie(newRelease);
                     movie = newRelease;
@@ -100,13 +144,22 @@ public class AddMovieServlet extends HttpServlet {
 
                 case "classic":
                     boolean hasAwards = "on".equals(hasAwardsStr) || "true".equals(hasAwardsStr);
-                    movie = movieManager.addClassicMovie(title, director, genre, releaseYear, rating,
-                            significance != null ? significance : "", hasAwards);
+                    movie = movieManager.addClassicMovie(
+                            title, director, genre, releaseYear, rating,
+                            significance != null ? significance : "", hasAwards,
+                            coverPhotoStream, originalFileName);
                     break;
 
                 default: // Regular movie
-                    movie = movieManager.addRegularMovie(title, director, genre, releaseYear, rating);
+                    movie = movieManager.addRegularMovie(
+                            title, director, genre, releaseYear, rating,
+                            coverPhotoStream, originalFileName);
                     break;
+            }
+
+            // Close the input stream if it was opened
+            if (coverPhotoStream != null) {
+                coverPhotoStream.close();
             }
 
             // Set success message
