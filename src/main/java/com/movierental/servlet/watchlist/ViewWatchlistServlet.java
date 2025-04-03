@@ -1,6 +1,7 @@
 package com.movierental.servlet.watchlist;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,10 +15,9 @@ import javax.servlet.http.HttpSession;
 
 import com.movierental.model.movie.Movie;
 import com.movierental.model.movie.MovieManager;
-import com.movierental.model.user.User;
-import com.movierental.model.watchlist.RecentlyWatched;
-import com.movierental.model.watchlist.Watchlist;
 import com.movierental.model.watchlist.WatchlistManager;
+import com.movierental.model.watchlist.Watchlist;
+import com.movierental.model.user.User;
 
 /**
  * Servlet handling viewing the watchlist
@@ -77,7 +77,12 @@ public class ViewWatchlistServlet extends HttpServlet {
             watchlist = watchlistManager.getWatchlistByUser(userId);
         }
 
-        System.out.println("Retrieved " + (watchlist != null ? watchlist.size() : 0) + " watchlist entries");
+        // If the list is null, initialize it as empty
+        if (watchlist == null) {
+            watchlist = new ArrayList<>();
+        }
+
+        System.out.println("Retrieved " + watchlist.size() + " watchlist entries");
 
         // Sort watchlist
         if ("priority".equals(sort)) {
@@ -112,21 +117,26 @@ public class ViewWatchlistServlet extends HttpServlet {
         System.out.println("Watchlist stats - Total: " + totalCount + ", Unwatched: " + unwatchedCount + ", Watched: " + watchedCount);
 
         // Get recently watched movies
-        RecentlyWatched recentlyWatched = watchlistManager.getRecentlyWatched(userId);
-        List<String> recentMovieIds = recentlyWatched.getMovieIds();
+        List<String> recentMovieIds = new ArrayList<>();
+        try {
+            recentMovieIds = watchlistManager.getRecentlyWatched(userId).getMovieIds();
+            System.out.println("Retrieved " + recentMovieIds.size() + " recently watched movies");
 
-        System.out.println("Retrieved " + recentMovieIds.size() + " recently watched movies");
-
-        // Get movie details for recently watched
-        for (String movieId : recentMovieIds) {
-            if (!movieMap.containsKey(movieId)) {
-                Movie movie = movieManager.getMovieById(movieId);
-                if (movie != null) {
-                    movieMap.put(movieId, movie);
-                } else {
-                    System.out.println("Warning: Recently watched movie not found for ID: " + movieId);
+            // Get movie details for recently watched
+            for (String movieId : recentMovieIds) {
+                if (!movieMap.containsKey(movieId)) {
+                    Movie movie = movieManager.getMovieById(movieId);
+                    if (movie != null) {
+                        movieMap.put(movieId, movie);
+                    } else {
+                        System.out.println("Warning: Recently watched movie not found for ID: " + movieId);
+                    }
                 }
             }
+        } catch (Exception e) {
+            System.out.println("Error getting recently watched movies: " + e.getMessage());
+            e.printStackTrace();
+            // Initialize as empty if there's an error
         }
 
         // Set attributes for JSP

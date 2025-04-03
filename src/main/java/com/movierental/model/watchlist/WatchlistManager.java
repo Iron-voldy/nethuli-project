@@ -2,15 +2,10 @@ package com.movierental.model.watchlist;
 
 import java.io.*;
 import java.util.*;
-
 import javax.servlet.ServletContext;
-
 import com.movierental.model.movie.Movie;
 import com.movierental.model.movie.MovieManager;
 
-/**
- * WatchlistManager class handles all watchlist related operations
- */
 public class WatchlistManager {
     private static final String WATCHLIST_FILE_NAME = "watchlists.txt";
     private static final String RECENTLY_WATCHED_FILE_NAME = "recently_watched.txt";
@@ -18,15 +13,13 @@ public class WatchlistManager {
     private String watchlistFilePath;
     private String recentlyWatchedFilePath;
     private List<Watchlist> watchlists;
-    private Map<String, RecentlyWatched> recentlyWatchedMap; // userId -> RecentlyWatched
+    private Map<String, RecentlyWatched> recentlyWatchedMap;
     private ServletContext servletContext;
 
-    // Constructor without ServletContext
     public WatchlistManager() {
         this(null);
     }
 
-    // Constructor with ServletContext
     public WatchlistManager(ServletContext servletContext) {
         this.servletContext = servletContext;
         watchlists = new ArrayList<>();
@@ -36,7 +29,6 @@ public class WatchlistManager {
         loadRecentlyWatched();
     }
 
-    // Initialize file paths
     private void initializeFilePaths() {
         if (servletContext != null) {
             // Use WEB-INF/data within the application context
@@ -68,12 +60,11 @@ public class WatchlistManager {
         System.out.println("WatchlistManager: Using recently watched file path: " + recentlyWatchedFilePath);
     }
 
-    // Load watchlists from file
     private void loadWatchlists() {
         File file = new File(watchlistFilePath);
 
         // Create directory if it doesn't exist
-        if (file.getParentFile() != null) {
+        if (file.getParentFile() != null && !file.getParentFile().exists()) {
             file.getParentFile().mkdirs();
         }
 
@@ -107,26 +98,32 @@ public class WatchlistManager {
         }
     }
 
-    // Save watchlists to file
     private void saveWatchlists() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(watchlistFilePath))) {
-            for (Watchlist watchlist : watchlists) {
-                writer.write(watchlist.toFileString());
-                writer.newLine();
+        try {
+            // Ensure parent directory exists
+            File file = new File(watchlistFilePath);
+            if (file.getParentFile() != null && !file.getParentFile().exists()) {
+                file.getParentFile().mkdirs();
             }
-            System.out.println("Saved " + watchlists.size() + " watchlist entries");
+
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(watchlistFilePath))) {
+                for (Watchlist watchlist : watchlists) {
+                    writer.write(watchlist.toFileString());
+                    writer.newLine();
+                }
+            }
+            System.out.println("Saved " + watchlists.size() + " watchlist entries to " + watchlistFilePath);
         } catch (IOException e) {
             System.err.println("Error saving watchlists: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    // Load recently watched from file
     private void loadRecentlyWatched() {
         File file = new File(recentlyWatchedFilePath);
 
         // Create directory if it doesn't exist
-        if (file.getParentFile() != null) {
+        if (file.getParentFile() != null && !file.getParentFile().exists()) {
             file.getParentFile().mkdirs();
         }
 
@@ -160,12 +157,19 @@ public class WatchlistManager {
         }
     }
 
-    // Save recently watched to file
     private void saveRecentlyWatched() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(recentlyWatchedFilePath))) {
-            for (RecentlyWatched recentlyWatched : recentlyWatchedMap.values()) {
-                writer.write(recentlyWatched.toFileString());
-                writer.newLine();
+        try {
+            // Ensure parent directory exists
+            File file = new File(recentlyWatchedFilePath);
+            if (file.getParentFile() != null && !file.getParentFile().exists()) {
+                file.getParentFile().mkdirs();
+            }
+
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(recentlyWatchedFilePath))) {
+                for (RecentlyWatched recentlyWatched : recentlyWatchedMap.values()) {
+                    writer.write(recentlyWatched.toFileString());
+                    writer.newLine();
+                }
             }
             System.out.println("Saved " + recentlyWatchedMap.size() + " recently watched entries");
         } catch (IOException e) {
@@ -174,12 +178,13 @@ public class WatchlistManager {
         }
     }
 
-    // Add a movie to watchlist
     public Watchlist addToWatchlist(String userId, String movieId, int priority, String notes) {
         System.out.println("Adding to watchlist - User ID: " + userId + ", Movie ID: " + movieId);
 
-        // Check if movie exists
-        MovieManager movieManager = new MovieManager(servletContext);
+        // Check if movie exists - use the MovieManager with ServletContext
+        MovieManager movieManager = (servletContext != null) ?
+                new MovieManager(servletContext) :
+                new MovieManager();
         Movie movie = movieManager.getMovieById(movieId);
 
         if (movie == null) {
@@ -214,7 +219,6 @@ public class WatchlistManager {
         return watchlist;
     }
 
-    // Get all movies in a user's watchlist
     public List<Watchlist> getWatchlistByUser(String userId) {
         List<Watchlist> userWatchlist = new ArrayList<>();
 
@@ -227,7 +231,6 @@ public class WatchlistManager {
         return userWatchlist;
     }
 
-    // Get unwatched movies in a user's watchlist
     public List<Watchlist> getUnwatchedByUser(String userId) {
         List<Watchlist> unwatched = new ArrayList<>();
 
@@ -240,7 +243,6 @@ public class WatchlistManager {
         return unwatched;
     }
 
-    // Get watched movies in a user's watchlist
     public List<Watchlist> getWatchedByUser(String userId) {
         List<Watchlist> watched = new ArrayList<>();
 
@@ -253,7 +255,6 @@ public class WatchlistManager {
         return watched;
     }
 
-    // Check if a movie is in a user's watchlist
     public boolean isInWatchlist(String userId, String movieId) {
         for (Watchlist watchlist : watchlists) {
             if (watchlist.getUserId().equals(userId) && watchlist.getMovieId().equals(movieId)) {
@@ -264,7 +265,6 @@ public class WatchlistManager {
         return false;
     }
 
-    // Get a specific watchlist entry
     public Watchlist getWatchlistById(String watchlistId) {
         for (Watchlist watchlist : watchlists) {
             if (watchlist.getWatchlistId().equals(watchlistId)) {
@@ -275,7 +275,6 @@ public class WatchlistManager {
         return null;
     }
 
-    // Get a user's watchlist entry for a specific movie
     public Watchlist getWatchlistByUserAndMovie(String userId, String movieId) {
         for (Watchlist watchlist : watchlists) {
             if (watchlist.getUserId().equals(userId) && watchlist.getMovieId().equals(movieId)) {
@@ -286,7 +285,6 @@ public class WatchlistManager {
         return null;
     }
 
-    // Update watchlist entry
     public boolean updateWatchlist(Watchlist watchlist) {
         for (int i = 0; i < watchlists.size(); i++) {
             if (watchlists.get(i).getWatchlistId().equals(watchlist.getWatchlistId())) {
@@ -299,7 +297,6 @@ public class WatchlistManager {
         return false;
     }
 
-    // Mark movie as watched
     public boolean markAsWatched(String watchlistId) {
         Watchlist watchlist = getWatchlistById(watchlistId);
 
@@ -316,7 +313,6 @@ public class WatchlistManager {
         return true;
     }
 
-    // Remove from watchlist
     public boolean removeFromWatchlist(String watchlistId) {
         for (int i = 0; i < watchlists.size(); i++) {
             if (watchlists.get(i).getWatchlistId().equals(watchlistId)) {
@@ -329,7 +325,6 @@ public class WatchlistManager {
         return false;
     }
 
-    // Remove movie from a user's watchlist
     public boolean removeFromWatchlist(String userId, String movieId) {
         for (int i = 0; i < watchlists.size(); i++) {
             if (watchlists.get(i).getUserId().equals(userId) &&
@@ -343,7 +338,6 @@ public class WatchlistManager {
         return false;
     }
 
-    // Get a user's recently watched
     public RecentlyWatched getRecentlyWatched(String userId) {
         if (recentlyWatchedMap.containsKey(userId)) {
             return recentlyWatchedMap.get(userId);
@@ -356,14 +350,12 @@ public class WatchlistManager {
         }
     }
 
-    // Add to recently watched
     public void addToRecentlyWatched(String userId, String movieId) {
         RecentlyWatched recentlyWatched = getRecentlyWatched(userId);
         recentlyWatched.addMovie(movieId);
         saveRecentlyWatched();
     }
 
-    // Clear a user's recently watched
     public void clearRecentlyWatched(String userId) {
         if (recentlyWatchedMap.containsKey(userId)) {
             recentlyWatchedMap.get(userId).clear();
@@ -371,12 +363,10 @@ public class WatchlistManager {
         }
     }
 
-    // Get all watchlists
     public List<Watchlist> getAllWatchlists() {
         return new ArrayList<>(watchlists);
     }
 
-    // Sort watchlist by priority
     public List<Watchlist> sortByPriority(List<Watchlist> watchlistToSort) {
         List<Watchlist> sorted = new ArrayList<>(watchlistToSort);
         Collections.sort(sorted, new Comparator<Watchlist>() {
@@ -388,7 +378,6 @@ public class WatchlistManager {
         return sorted;
     }
 
-    // Sort watchlist by date added
     public List<Watchlist> sortByDateAdded(List<Watchlist> watchlistToSort, boolean ascending) {
         List<Watchlist> sorted = new ArrayList<>(watchlistToSort);
         Collections.sort(sorted, new Comparator<Watchlist>() {
@@ -402,7 +391,6 @@ public class WatchlistManager {
         return sorted;
     }
 
-    // Get count of movies in watchlist
     public int getWatchlistCount(String userId) {
         int count = 0;
         for (Watchlist watchlist : watchlists) {
@@ -413,7 +401,6 @@ public class WatchlistManager {
         return count;
     }
 
-    // Get count of unwatched movies
     public int getUnwatchedCount(String userId) {
         int count = 0;
         for (Watchlist watchlist : watchlists) {
@@ -424,7 +411,6 @@ public class WatchlistManager {
         return count;
     }
 
-    // Get count of watched movies
     public int getWatchedCount(String userId) {
         int count = 0;
         for (Watchlist watchlist : watchlists) {
@@ -435,7 +421,6 @@ public class WatchlistManager {
         return count;
     }
 
-    // Set ServletContext (can be used to update the context after initialization)
     public void setServletContext(ServletContext servletContext) {
         this.servletContext = servletContext;
         initializeFilePaths();

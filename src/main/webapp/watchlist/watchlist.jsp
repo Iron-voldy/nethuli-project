@@ -5,6 +5,8 @@
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="java.text.SimpleDateFormat" %>
+<%@ page import="java.util.HashMap" %>
+<%@ page import="java.util.ArrayList" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -475,21 +477,37 @@
 <body>
     <%
         // Get user from session
-        User user = (User) request.getSession().getAttribute("user");
+        User user = (User) session.getAttribute("user");
         if (user == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
-        // Get data from request attributes
+        // Get data from request attributes - with null safety
         List<Watchlist> watchlist = (List<Watchlist>) request.getAttribute("watchlist");
+        if (watchlist == null) watchlist = new ArrayList<>();
+
         Map<String, Movie> movieMap = (Map<String, Movie>) request.getAttribute("movieMap");
+        if (movieMap == null) movieMap = new HashMap<>();
+
         String filter = (String) request.getAttribute("filter");
+        if (filter == null) filter = "all";
+
         String sort = (String) request.getAttribute("sort");
-        int totalCount = (Integer) request.getAttribute("totalCount");
-        int unwatchedCount = (Integer) request.getAttribute("unwatchedCount");
-        int watchedCount = (Integer) request.getAttribute("watchedCount");
+        if (sort == null) sort = "priority";
+
+        // Use safe defaults for the statistics
+        Integer totalCountObj = (Integer) request.getAttribute("totalCount");
+        int totalCount = (totalCountObj != null) ? totalCountObj : 0;
+
+        Integer unwatchedCountObj = (Integer) request.getAttribute("unwatchedCount");
+        int unwatchedCount = (unwatchedCountObj != null) ? unwatchedCountObj : 0;
+
+        Integer watchedCountObj = (Integer) request.getAttribute("watchedCount");
+        int watchedCount = (watchedCountObj != null) ? watchedCountObj : 0;
+
         List<String> recentMovieIds = (List<String>) request.getAttribute("recentMovieIds");
+        if (recentMovieIds == null) recentMovieIds = new ArrayList<>();
 
         // Date formatter
         SimpleDateFormat dateFormat = new SimpleDateFormat("MMMM dd, yyyy");
@@ -783,5 +801,5 @@
             }
         });
     </script>
-</body>
-</html>
+    </body>
+    </html>

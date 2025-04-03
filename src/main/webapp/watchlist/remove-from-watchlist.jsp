@@ -1,12 +1,13 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="com.movierental.model.user.User" %>
 <%@ page import="com.movierental.model.movie.Movie" %>
+<%@ page import="com.movierental.model.watchlist.Watchlist" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add to Watchlist - Movie Rental System</title>
+    <title>Remove from Watchlist - Movie Rental System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
@@ -140,40 +141,10 @@
             box-shadow: 0 0 10px rgba(0, 200, 255, 0.4);
         }
 
-        .form-label {
-            color: var(--neon-blue);
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-        }
-
-        .form-control {
-            background-color: var(--input-bg);
-            border: 1px solid var(--input-border);
+        .badge-danger {
+            background: linear-gradient(to right, #F44336, #FF5722);
             color: white;
-            border-radius: 8px;
-            padding: 10px 15px;
-        }
-
-        .form-control:focus {
-            background-color: #3a3a3a;
-            color: white;
-            border-color: var(--neon-blue);
-            box-shadow: 0 0 0 0.25rem rgba(0, 200, 255, 0.25);
-        }
-
-        .form-select {
-            background-color: var(--input-bg);
-            border: 1px solid var(--input-border);
-            color: white;
-            border-radius: 8px;
-            padding: 10px 15px;
-        }
-
-        .form-select:focus {
-            background-color: #3a3a3a;
-            color: white;
-            border-color: var(--neon-blue);
-            box-shadow: 0 0 0 0.25rem rgba(0, 200, 255, 0.25);
+            box-shadow: 0 0 10px rgba(244, 67, 54, 0.4);
         }
 
         .btn-neon {
@@ -193,6 +164,23 @@
             color: white;
         }
 
+        .btn-danger {
+            background: linear-gradient(to right, #F44336, #FF5722);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            padding: 10px 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(244, 67, 54, 0.3);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(244, 67, 54, 0.6);
+            color: white;
+        }
+
         .btn-secondary {
             background-color: #444;
             border: none;
@@ -209,95 +197,32 @@
             border-radius: 8px;
         }
 
-        .priority-section {
-            margin-bottom: 20px;
+        .watchlist-info {
+            background: rgba(244, 67, 54, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px dashed #FF5722;
         }
 
-        .priority-options {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .priority-option {
-            flex: 1;
-            text-align: center;
-            padding: 15px 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: all 0.2s;
-            position: relative;
-        }
-
-        .priority-option input {
-            position: absolute;
-            opacity: 0;
-            cursor: pointer;
-            height: 0;
-            width: 0;
-        }
-
-        .priority-option .option-label {
-            font-weight: 600;
-            font-size: 0.9rem;
+        .warning-icon {
+            font-size: 3rem;
+            color: #FF5722;
+            margin-bottom: 15px;
             display: block;
-            margin-bottom: 5px;
+            text-align: center;
         }
 
-        .priority-option .option-description {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
+        .warning-text {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #FF5722;
+            font-weight: 600;
         }
 
-        .priority-1 {
-            background-color: rgba(213, 0, 0, 0.2);
-            border-color: #D50000;
-        }
-
-        .priority-1.selected, .priority-1:hover {
-            background-color: rgba(213, 0, 0, 0.4);
-            box-shadow: 0 0 15px rgba(213, 0, 0, 0.5);
-        }
-
-        .priority-2 {
-            background-color: rgba(255, 109, 0, 0.2);
-            border-color: #FF6D00;
-        }
-
-        .priority-2.selected, .priority-2:hover {
-            background-color: rgba(255, 109, 0, 0.4);
-            box-shadow: 0 0 15px rgba(255, 109, 0, 0.5);
-        }
-
-        .priority-3 {
-            background-color: rgba(255, 171, 0, 0.2);
-            border-color: #FFAB00;
-        }
-
-        .priority-3.selected, .priority-3:hover {
-            background-color: rgba(255, 171, 0, 0.4);
-            box-shadow: 0 0 15px rgba(255, 171, 0, 0.5);
-        }
-
-        .priority-4 {
-            background-color: rgba(0, 200, 83, 0.2);
-            border-color: #00C853;
-        }
-
-        .priority-4.selected, .priority-4:hover {
-            background-color: rgba(0, 200, 83, 0.4);
-            box-shadow: 0 0 15px rgba(0, 200, 83, 0.5);
-        }
-
-        .priority-5 {
-            background-color: rgba(41, 121, 255, 0.2);
-            border-color: #2979FF;
-        }
-
-        .priority-5.selected, .priority-5:hover {
-            background-color: rgba(41, 121, 255, 0.4);
-            box-shadow: 0 0 15px rgba(41, 121, 255, 0.5);
+        .warning-message {
+            text-align: center;
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -310,10 +235,12 @@
             return;
         }
 
-        // Get movie from request attribute
+        // Get watchlist and movie from request attributes
+        Watchlist watchlist = (Watchlist) request.getAttribute("watchlist");
         Movie movie = (Movie) request.getAttribute("movie");
-        if (movie == null) {
-            response.sendRedirect(request.getContextPath() + "/search-movie");
+
+        if (watchlist == null || movie == null) {
+            response.sendRedirect(request.getContextPath() + "/view-watchlist");
             return;
         }
     %>
@@ -343,7 +270,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="<%= request.getContextPath() %>/view-watchlist">
+                        <a class="nav-link active" href="<%= request.getContextPath() %>/view-watchlist">
                             <i class="bi bi-bookmark-star"></i> Watchlist
                         </a>
                     </li>
@@ -369,7 +296,7 @@
             <div class="col-lg-8">
                 <div class="card">
                     <div class="card-header">
-                        <i class="bi bi-bookmark-plus"></i> Add to Watchlist
+                        <i class="bi bi-trash"></i> Remove from Watchlist
                     </div>
                     <div class="movie-info">
                         <h2 class="movie-title"><%= movie.getTitle() %></h2>
@@ -378,6 +305,7 @@
                         </div>
                         <div>
                             <span class="movie-badge badge-blue"><%= movie.getGenre() %></span>
+                            <span class="movie-badge badge-danger">Removing</span>
                         </div>
                     </div>
                     <div class="card-body p-4">
@@ -388,56 +316,25 @@
                             </div>
                         <% } %>
 
-                        <form action="<%= request.getContextPath() %>/add-to-watchlist" method="post">
-                            <input type="hidden" name="movieId" value="<%= movie.getMovieId() %>">
+                        <div class="watchlist-info">
+                            <i class="bi bi-exclamation-triangle-fill warning-icon"></i>
+                            <h4 class="warning-text">Are you sure?</h4>
+                            <p class="warning-message">
+                                You are about to remove "<strong><%= movie.getTitle() %></strong>" from your watchlist.
+                                This action cannot be undone.
+                            </p>
+                        </div>
 
-                            <div class="priority-section">
-                                <label class="form-label">Set Priority</label>
-                                <div class="priority-options">
-                                    <label class="priority-option priority-1">
-                                        <input type="radio" name="priority" value="1">
-                                        <span class="option-label">Highest</span>
-                                        <span class="option-description">Must watch ASAP</span>
-                                    </label>
-
-                                    <label class="priority-option priority-2">
-                                        <input type="radio" name="priority" value="2">
-                                        <span class="option-label">High</span>
-                                        <span class="option-description">Watch soon</span>
-                                    </label>
-
-                                    <label class="priority-option priority-3">
-                                        <input type="radio" name="priority" value="3" checked>
-                                        <span class="option-label">Medium</span>
-                                        <span class="option-description">Standard</span>
-                                    </label>
-
-                                    <label class="priority-option priority-4">
-                                        <input type="radio" name="priority" value="4">
-                                        <span class="option-label">Low</span>
-                                        <span class="option-description">When available</span>
-                                    </label>
-
-                                    <label class="priority-option priority-5">
-                                        <input type="radio" name="priority" value="5">
-                                        <span class="option-label">Lowest</span>
-                                        <span class="option-description">Someday</span>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="notes" class="form-label">Notes (Optional)</label>
-                                <textarea class="form-control" id="notes" name="notes" rows="3"
-                                    placeholder="Add any notes about why you want to watch this movie..."></textarea>
-                            </div>
+                        <form action="<%= request.getContextPath() %>/remove-from-watchlist" method="post">
+                            <input type="hidden" name="watchlistId" value="<%= watchlist.getWatchlistId() %>">
+                            <input type="hidden" name="confirmRemove" value="yes">
 
                             <div class="mt-4 d-flex justify-content-between">
-                                <a href="<%= request.getContextPath() %>/movie-details?id=<%= movie.getMovieId() %>" class="btn btn-secondary">
+                                <a href="<%= request.getContextPath() %>/view-watchlist" class="btn btn-secondary">
                                     <i class="bi bi-arrow-left"></i> Cancel
                                 </a>
-                                <button type="submit" class="btn btn-neon">
-                                    <i class="bi bi-bookmark-plus"></i> Add to Watchlist
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="bi bi-trash"></i> Confirm Removal
                                 </button>
                             </div>
                         </form>
@@ -448,32 +345,5 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Make priority options more interactive
-        document.addEventListener('DOMContentLoaded', function() {
-            const priorityOptions = document.querySelectorAll('.priority-option');
-
-            priorityOptions.forEach(option => {
-                const radio = option.querySelector('input[type="radio"]');
-
-                // Set initial selected state
-                if (radio.checked) {
-                    option.classList.add('selected');
-                }
-
-                // Update on click
-                option.addEventListener('click', function() {
-                    // Remove selected class from all options
-                    priorityOptions.forEach(opt => opt.classList.remove('selected'));
-
-                    // Add selected class to clicked option
-                    option.classList.add('selected');
-
-                    // Check the radio button
-                    radio.checked = true;
-                });
-            });
-        });
-    </script>
 </body>
 </html>

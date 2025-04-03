@@ -1,7 +1,6 @@
 package com.movierental.servlet.watchlist;
 
 import java.io.IOException;
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -15,28 +14,18 @@ import com.movierental.model.user.User;
 import com.movierental.model.watchlist.Watchlist;
 import com.movierental.model.watchlist.WatchlistManager;
 
-/**
- * Servlet handling adding movies to the watchlist
- */
 @WebServlet("/add-to-watchlist")
 public class AddToWatchlistServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Handles GET requests - display the add to watchlist form
-     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
-        System.out.println("AddToWatchlistServlet.doGet() called");
-
         // Check if user is logged in
         HttpSession session = request.getSession(false);
         User user = (session != null) ? (User) session.getAttribute("user") : null;
 
         if (user == null) {
-            System.out.println("User not logged in, redirecting to login");
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
@@ -46,8 +35,6 @@ public class AddToWatchlistServlet extends HttpServlet {
         System.out.println("Movie ID from request: " + movieId);
 
         if (movieId == null || movieId.trim().isEmpty()) {
-            // Redirect to search page if no movie ID provided
-            System.out.println("No movie ID provided, redirecting to search page");
             response.sendRedirect(request.getContextPath() + "/search-movie");
             return;
         }
@@ -60,8 +47,6 @@ public class AddToWatchlistServlet extends HttpServlet {
         System.out.println("Found movie: " + (movie != null ? movie.getTitle() : "null"));
 
         if (movie == null) {
-            // Set error message if movie not found
-            System.out.println("Movie not found, redirecting to search page");
             session.setAttribute("errorMessage", "Movie not found");
             response.sendRedirect(request.getContextPath() + "/search-movie");
             return;
@@ -69,17 +54,14 @@ public class AddToWatchlistServlet extends HttpServlet {
 
         // Check if movie is already in watchlist
         String userId = user.getUserId();
-        WatchlistManager watchlistManager = new WatchlistManager();
+        WatchlistManager watchlistManager = new WatchlistManager(getServletContext()); // Pass ServletContext here
 
         if (watchlistManager.isInWatchlist(userId, movieId)) {
-            // Movie is already in watchlist, redirect to manage watchlist
-            System.out.println("Movie already in watchlist");
             Watchlist existingEntry = watchlistManager.getWatchlistByUserAndMovie(userId, movieId);
             if (existingEntry != null) {
                 session.setAttribute("infoMessage", "Movie is already in your watchlist.");
                 response.sendRedirect(request.getContextPath() + "/manage-watchlist?id=" + existingEntry.getWatchlistId());
             } else {
-                // In case getWatchlistByUserAndMovie returns null but isInWatchlist is true (inconsistent state)
                 session.setAttribute("infoMessage", "Movie is already in your watchlist.");
                 response.sendRedirect(request.getContextPath() + "/view-watchlist");
             }
@@ -88,26 +70,14 @@ public class AddToWatchlistServlet extends HttpServlet {
 
         // Set movie as a request attribute
         request.setAttribute("movie", movie);
-        System.out.println("Forwarding to add-to-watchlist.jsp");
 
         // Forward to add to watchlist form
-        try {
-            RequestDispatcher dispatcher = request.getRequestDispatcher("/watchlist/add-to-watchlist.jsp");
-            dispatcher.forward(request, response);
-        } catch (Exception e) {
-            System.err.println("Error forwarding to watchlist JSP: " + e.getMessage());
-            e.printStackTrace();
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error processing request");
-        }
+        request.getRequestDispatcher("/watchlist/add-to-watchlist.jsp").forward(request, response);
     }
 
-    /**
-     * Handles POST requests - process adding movie to watchlist
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
         System.out.println("AddToWatchlistServlet.doPost() called");
 
         // Check if user is logged in
@@ -115,7 +85,6 @@ public class AddToWatchlistServlet extends HttpServlet {
         User user = (session != null) ? (User) session.getAttribute("user") : null;
 
         if (user == null) {
-            System.out.println("User not logged in, redirecting to login");
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
@@ -135,7 +104,6 @@ public class AddToWatchlistServlet extends HttpServlet {
 
         // Validate required fields
         if (movieId == null || movieId.trim().isEmpty()) {
-            System.out.println("Movie ID is required");
             request.setAttribute("errorMessage", "Movie ID is required");
 
             // Need to get movie for the form
@@ -155,8 +123,8 @@ public class AddToWatchlistServlet extends HttpServlet {
             }
             System.out.println("Parsed priority: " + priority);
 
-            // Add to watchlist
-            WatchlistManager watchlistManager = new WatchlistManager();
+            // Add to watchlist - use ServletContext here
+            WatchlistManager watchlistManager = new WatchlistManager(getServletContext());
             Watchlist watchlist = watchlistManager.addToWatchlist(userId, movieId, priority, notes);
 
             if (watchlist != null) {
@@ -184,13 +152,8 @@ public class AddToWatchlistServlet extends HttpServlet {
             }
 
         } catch (NumberFormatException e) {
-            System.out.println("Invalid priority format: " + e.getMessage());
             request.setAttribute("errorMessage", "Invalid priority");
             doGet(request, response);
-        } catch (Exception e) {
-            System.err.println("Error in doPost: " + e.getMessage());
-            e.printStackTrace();
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error processing request");
         }
     }
 }
