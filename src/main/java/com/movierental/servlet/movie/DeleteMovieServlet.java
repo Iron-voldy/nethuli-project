@@ -33,7 +33,7 @@ public class DeleteMovieServlet extends HttpServlet {
         }
 
         // Get movie from database
-        MovieManager movieManager = new MovieManager();
+        MovieManager movieManager = new MovieManager(getServletContext()); // Pass ServletContext
         Movie movie = movieManager.getMovieById(movieId);
 
         if (movie == null) {
@@ -70,8 +70,8 @@ public class DeleteMovieServlet extends HttpServlet {
             return;
         }
 
-        // Get movie manager
-        MovieManager movieManager = new MovieManager();
+        // Get movie manager with ServletContext
+        MovieManager movieManager = new MovieManager(getServletContext());
 
         // Get movie title for success message before deletion
         Movie movie = movieManager.getMovieById(movieId);

@@ -4,7 +4,6 @@
 <%@ page import="com.movierental.model.movie.NewRelease" %>
 <%@ page import="com.movierental.model.movie.ClassicMovie" %>
 <%@ page import="com.movierental.model.movie.MovieManager" %>
-<%@ page import="java.text.SimpleDateFormat" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -93,6 +92,8 @@
             margin-bottom: 30px;
             border: 1px solid #333;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
         }
 
         .movie-poster {
@@ -327,6 +328,20 @@
         .special-info-title i {
             margin-right: 8px;
         }
+
+        .alert-success {
+            background-color: rgba(0, 51, 0, 0.7);
+            color: #66ff66;
+            border-color: #005500;
+            border-radius: 8px;
+        }
+
+        .alert-danger {
+            background-color: rgba(51, 0, 0, 0.7);
+            color: #ff6666;
+            border-color: #550000;
+            border-radius: 8px;
+        }
     </style>
 </head>
 <body>
@@ -340,23 +355,29 @@
 
         // Get movie ID from request
         String movieId = request.getParameter("id");
+
         if (movieId == null || movieId.trim().isEmpty()) {
+            // Redirect to search page if no movie ID provided
             response.sendRedirect(request.getContextPath() + "/search-movie");
             return;
         }
 
-        // Get movie from database
-        MovieManager movieManager = new MovieManager(application);
+        // Create MovieManager with ServletContext
+        MovieManager movieManager = new MovieManager(getServletContext());
+
+        // Find the movie
         Movie movie = movieManager.getMovieById(movieId);
 
         if (movie == null) {
+            // Set error message if movie not found
+            session.setAttribute("errorMessage", "Movie not found");
             response.sendRedirect(request.getContextPath() + "/search-movie");
             return;
         }
 
+        // Determine movie type for additional rendering
         boolean isNewRelease = movie instanceof NewRelease;
         boolean isClassic = movie instanceof ClassicMovie;
-        boolean hasAwards = isClassic && ((ClassicMovie)movie).hasAwards();
 
         // Check if the movie has a cover photo
         String coverPhotoUrl = movieManager.getCoverPhotoUrl(movie);
@@ -383,12 +404,12 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="<%= request.getContextPath() %>/rental/rental-history.jsp">
+                        <a class="nav-link" href="<%= request.getContextPath() %>/rental-history">
                             <i class="bi bi-collection-play"></i> My Rentals
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="<%= request.getContextPath() %>/watchlist/watchlist.jsp">
+                        <a class="nav-link" href="<%= request.getContextPath() %>/view-watchlist">
                             <i class="bi bi-bookmark-star"></i> Watchlist
                         </a>
                     </li>
@@ -410,8 +431,31 @@
     </nav>
 
     <div class="container">
+        <!-- Flash messages -->
+        <%
+            // Check for messages from session
+            String successMessage = (String) session.getAttribute("successMessage");
+            String errorMessage = (String) session.getAttribute("errorMessage");
+
+            if(successMessage != null) {
+                out.println("<div class='alert alert-success'>");
+                out.println("<i class='bi bi-check-circle-fill me-2'></i>");
+                out.println(successMessage);
+                out.println("</div>");
+                session.removeAttribute("successMessage");
+            }
+
+            if(errorMessage != null) {
+                out.println("<div class='alert alert-danger'>");
+                out.println("<i class='bi bi-exclamation-triangle-fill me-2'></i>");
+                out.println(errorMessage);
+                out.println("</div>");
+                session.removeAttribute("errorMessage");
+            }
+        %>
+
         <!-- Movie Header -->
-        <div class="movie-header d-flex">
+        <div class="movie-header">
             <div class="movie-poster">
                 <% if(hasCoverPhoto) { %>
                     <img src="<%= request.getContextPath() %>/image-servlet?movieId=<%= movie.getMovieId() %>" alt="<%= movie.getTitle() %>">
@@ -434,7 +478,7 @@
                         <span class="movie-badge badge-purple">New Release</span>
                     <% } else if(isClassic) { %>
                         <span class="movie-badge badge-purple">Classic</span>
-                        <% if(hasAwards) { %>
+                        <% if(isClassic && ((ClassicMovie)movie).hasAwards()) { %>
                             <span class="movie-badge badge-gold">Award Winner</span>
                         <% } %>
                     <% } %>
@@ -564,7 +608,7 @@
                     </div>
                 </div>
 
-                <!-- Reviews Card (placeholder) -->
+                <!-- Reviews Card -->
                 <div class="card">
                     <div class="card-header">
                         <i class="bi bi-star"></i> Reviews
@@ -572,9 +616,9 @@
                     <div class="card-body p-4 text-center">
                         <i class="bi bi-chat-square-text" style="font-size: 3rem; color: #444;"></i>
                         <p class="mt-3 text-secondary">No reviews yet</p>
-                        <button class="btn btn-neon mt-2">
+                        <a href="<%= request.getContextPath() %>/movie-reviews?movieId=<%= movie.getMovieId() %>" class="btn btn-neon mt-2">
                             <i class="bi bi-pencil"></i> Write a Review
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -605,7 +649,7 @@
                             </div>
                         <% } %>
 
-                        <a href="#" class="movie-action-btn">
+                        <a href="<%= request.getContextPath() %>/add-to-watchlist?movieId=<%= movie.getMovieId() %>" class="movie-action-btn">
                             <i class="bi bi-bookmark-plus"></i>
                             <div>
                                 <div><strong>Add to Watchlist</strong></div>
