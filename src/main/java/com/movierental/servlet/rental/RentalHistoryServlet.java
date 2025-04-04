@@ -39,18 +39,21 @@ public class RentalHistoryServlet extends HttpServlet {
 
         // Get rental history from database
         RentalManager rentalManager = new RentalManager(getServletContext());
-        List<Transaction> rentals = rentalManager.getTransactionsByUser(userId);
+        List<Transaction> allTransactions = rentalManager.getTransactionsByUser(userId);
 
-        // Get active rentals (not returned)
+        // Create separate lists for different transaction states
         List<Transaction> activeRentals = new ArrayList<>();
         List<Transaction> rentalHistory = new ArrayList<>();
+        List<Transaction> canceledRentals = new ArrayList<>();
 
-        // Separate active rentals and history
-        for (Transaction rental : rentals) {
-            if (!rental.isReturned()) {
-                activeRentals.add(rental);
+        // Separate transactions by state
+        for (Transaction transaction : allTransactions) {
+            if (transaction.isReturned()) {
+                rentalHistory.add(transaction);
+            } else if (transaction.isCanceled()) {
+                canceledRentals.add(transaction);
             } else {
-                rentalHistory.add(rental);
+                activeRentals.add(transaction);
             }
         }
 
@@ -61,9 +64,9 @@ public class RentalHistoryServlet extends HttpServlet {
         MovieManager movieManager = new MovieManager(getServletContext());
         Map<String, Movie> movieMap = new HashMap<>();
 
-        // Fill movie map for all rentals
-        for (Transaction rental : rentals) {
-            String movieId = rental.getMovieId();
+        // Fill movie map for all transactions
+        for (Transaction transaction : allTransactions) {
+            String movieId = transaction.getMovieId();
             if (!movieMap.containsKey(movieId)) {
                 Movie movie = movieManager.getMovieById(movieId);
                 if (movie != null) {
@@ -75,11 +78,13 @@ public class RentalHistoryServlet extends HttpServlet {
         // Debug logging
         System.out.println("RentalHistoryServlet: Active Rentals - " + activeRentals.size());
         System.out.println("RentalHistoryServlet: Rental History - " + rentalHistory.size());
+        System.out.println("RentalHistoryServlet: Canceled Rentals - " + canceledRentals.size());
         System.out.println("RentalHistoryServlet: Overdue Rentals - " + overdueRentals.size());
 
         // Set data in request attributes
         request.setAttribute("activeRentals", activeRentals);
         request.setAttribute("rentalHistory", rentalHistory);
+        request.setAttribute("canceledRentals", canceledRentals);
         request.setAttribute("overdueRentals", overdueRentals);
         request.setAttribute("movieMap", movieMap);
 

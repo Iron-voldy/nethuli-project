@@ -227,6 +227,15 @@
             font-weight: 600;
         }
 
+        .badge-purple {
+            background: linear-gradient(to right, #9C27B0, #673AB7);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
         .action-buttons {
             display: flex;
             gap: 5px;
@@ -254,6 +263,26 @@
 
         .action-button.return:hover {
             background-color: #0099cc;
+            transform: translateY(-2px);
+        }
+
+        .action-button.edit {
+            background-color: #9C27B0;
+            color: white;
+        }
+
+        .action-button.edit:hover {
+            background-color: #7B1FA2;
+            transform: translateY(-2px);
+        }
+
+        .action-button.cancel {
+            background-color: #F44336;
+            color: white;
+        }
+
+        .action-button.cancel:hover {
+            background-color: #D32F2F;
             transform: translateY(-2px);
         }
 
@@ -320,12 +349,14 @@
         List<Transaction> activeRentals = (List<Transaction>) request.getAttribute("activeRentals");
         List<Transaction> rentalHistory = (List<Transaction>) request.getAttribute("rentalHistory");
         List<Transaction> overdueRentals = (List<Transaction>) request.getAttribute("overdueRentals");
+        List<Transaction> canceledRentals = (List<Transaction>) request.getAttribute("canceledRentals");
         Map<String, Movie> movieMap = (Map<String, Movie>) request.getAttribute("movieMap");
 
         // Ensure the lists are not null
         activeRentals = activeRentals != null ? activeRentals : new ArrayList<>();
         rentalHistory = rentalHistory != null ? rentalHistory : new ArrayList<>();
         overdueRentals = overdueRentals != null ? overdueRentals : new ArrayList<>();
+        canceledRentals = canceledRentals != null ? canceledRentals : new ArrayList<>();
 
         // Date formatter
         SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy");
@@ -450,8 +481,11 @@
                                                 <a href="<%= request.getContextPath() %>/return-movie?id=<%= rental.getTransactionId() %>" class="action-button return">
                                                     <i class="bi bi-box-arrow-in-left"></i> Return
                                                 </a>
-                                                <a href="<%= request.getContextPath() %>/movie-details?id=<%= movie.getMovieId() %>" class="action-button view">
-                                                    <i class="bi bi-info-circle"></i> Details
+                                                <a href="<%= request.getContextPath() %>/edit-rental?id=<%= rental.getTransactionId() %>" class="action-button edit">
+                                                    <i class="bi bi-pencil"></i> Edit
+                                                </a>
+                                                <a href="<%= request.getContextPath() %>/cancel-rental?id=<%= rental.getTransactionId() %>" class="action-button cancel">
+                                                    <i class="bi bi-x-circle"></i> Cancel
                                                 </a>
                                             </div>
                                         </td>
@@ -527,8 +561,11 @@
                                                 <a href="<%= request.getContextPath() %>/return-movie?id=<%= rental.getTransactionId() %>" class="action-button return">
                                                     <i class="bi bi-box-arrow-in-left"></i> Return
                                                 </a>
-                                                <a href="<%= request.getContextPath() %>/movie-details?id=<%= movie.getMovieId() %>" class="action-button view">
-                                                    <i class="bi bi-info-circle"></i> Details
+                                                <a href="<%= request.getContextPath() %>/edit-rental?id=<%= rental.getTransactionId() %>" class="action-button edit">
+                                                    <i class="bi bi-pencil"></i> Edit
+                                                </a>
+                                                <a href="<%= request.getContextPath() %>/cancel-rental?id=<%= rental.getTransactionId() %>" class="action-button cancel">
+                                                    <i class="bi bi-x-circle"></i> Cancel
                                                 </a>
                                             </div>
                                         </td>
@@ -546,6 +583,65 @@
                         <a href="<%= request.getContextPath() %>/search-movie" class="btn btn-neon">
                             <i class="bi bi-search"></i> Browse Movies
                         </a>
+                    </div>
+                <% } %>
+
+                <% if (canceledRentals != null && !canceledRentals.isEmpty() && movieMap != null) { %>
+                    <div class="section-divider"></div>
+                    <h2 class="section-title">
+                        <i class="bi bi-x-circle"></i> Canceled Rentals
+                    </h2>
+                    <div class="table-responsive">
+                        <table class="rental-table">
+                            <thead>
+                                <tr>
+                                    <th>Movie</th>
+                                    <th>Rental Period</th>
+                                    <th>Cancellation Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% for (Transaction rental : canceledRentals) {
+                                    Movie movie = movieMap.get(rental.getMovieId());
+                                    if (movie != null) {
+                                %>
+                                    <tr>
+                                        <td>
+                                            <div class="movie-title"><%= movie.getTitle() %></div>
+                                            <div class="movie-director"><%= movie.getDirector() %> (<%= movie.getReleaseYear() %>)</div>
+                                        </td>
+                                        <td>
+                                            <div><%= dateFormat.format(rental.getRentalDate()) %></div>
+                                            <div class="date-info">Due: <%= dateFormat.format(rental.getDueDate()) %></div>
+                                        </td>
+                                        <td>
+                                            <div><%= dateFormat.format(rental.getCancellationDate()) %></div>
+                                            <div class="date-info">
+                                                <% if(rental.getCancellationReason() != null && !rental.getCancellationReason().isEmpty()) { %>
+                                                    <span>Reason: <%= rental.getCancellationReason() %></span>
+                                                <% } else { %>
+                                                    <span>No reason provided</span>
+                                                <% } %>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge-purple">Canceled</span>
+                                        </td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                <a href="<%= request.getContextPath() %>/movie-details?id=<%= movie.getMovieId() %>" class="action-button view">
+                                                    <i class="bi bi-info-circle"></i> Details
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <%
+                                    }
+                                } %>
+                            </tbody>
+                        </table>
                     </div>
                 <% } %>
 

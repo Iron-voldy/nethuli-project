@@ -195,6 +195,7 @@ public class RentalManager {
         transaction.setDueDate(dueDate);
         transaction.setRentalFee(rentalFee);
         transaction.setReturned(false);
+        transaction.setCanceled(false);
 
         System.out.println("RentalManager: Created transaction with ID: " + transaction.getTransactionId());
 
@@ -221,8 +222,8 @@ public class RentalManager {
             return false;
         }
 
-        if (transaction.isReturned()) {
-            System.out.println("RentalManager: Movie already returned");
+        if (transaction.isReturned() || transaction.isCanceled()) {
+            System.out.println("RentalManager: Movie already returned or rental canceled");
             return false;
         }
 
@@ -254,6 +255,87 @@ public class RentalManager {
         // Save updated transaction
         saveTransactions();
         System.out.println("RentalManager: Return process completed successfully");
+
+        return true;
+    }
+
+    // Cancel a rental
+    public boolean cancelRental(String transactionId, String reason) {
+        System.out.println("RentalManager: Starting cancellation process for transaction: " + transactionId);
+
+        Transaction transaction = getTransactionById(transactionId);
+        if (transaction == null) {
+            System.out.println("RentalManager: Transaction not found");
+            return false;
+        }
+
+        if (transaction.isReturned() || transaction.isCanceled()) {
+            System.out.println("RentalManager: Movie already returned or rental canceled");
+            return false;
+        }
+
+        // Update transaction status
+        transaction.setCanceled(true);
+        transaction.setCancellationDate(new Date());
+        transaction.setCancellationReason(reason);
+
+        // Update movie availability
+        Movie movie = movieManager.getMovieById(transaction.getMovieId());
+        if (movie != null) {
+            movie.setAvailable(true);
+            movieManager.updateMovie(movie);
+            System.out.println("RentalManager: Updated movie availability after cancellation");
+        } else {
+            System.out.println("RentalManager: Warning - Movie not found when canceling rental");
+        }
+
+        // Save updated transaction
+        saveTransactions();
+        System.out.println("RentalManager: Cancellation process completed successfully");
+
+        return true;
+    }
+
+    // Edit rental (update due date)
+    public boolean updateRentalDueDate(String transactionId, int newRentalDays) {
+        System.out.println("RentalManager: Starting update process for transaction: " + transactionId);
+
+        Transaction transaction = getTransactionById(transactionId);
+        if (transaction == null) {
+            System.out.println("RentalManager: Transaction not found");
+            return false;
+        }
+
+        if (transaction.isReturned() || transaction.isCanceled()) {
+            System.out.println("RentalManager: Cannot update a returned or canceled rental");
+            return false;
+        }
+
+        // Get user and movie to recalculate fee
+        User user = userManager.getUserById(transaction.getUserId());
+        Movie movie = movieManager.getMovieById(transaction.getMovieId());
+
+        if (user == null || movie == null) {
+            System.out.println("RentalManager: User or movie not found");
+            return false;
+        }
+
+        // Calculate new due date
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(transaction.getRentalDate()); // Start from original rental date
+        calendar.add(Calendar.DAY_OF_MONTH, newRentalDays);
+        Date newDueDate = calendar.getTime();
+
+        // Calculate new rental fee
+        double newRentalFee = calculateRentalFee(user, movie, newRentalDays);
+
+        // Update transaction
+        transaction.setDueDate(newDueDate);
+        transaction.setRentalFee(newRentalFee);
+
+        // Save updated transaction
+        saveTransactions();
+        System.out.println("RentalManager: Rental update completed successfully");
 
         return true;
     }
@@ -315,15 +397,26 @@ public class RentalManager {
         return userTransactions;
     }
 
-    // Get active (not returned) rentals by user ID
+    // Get active (not returned and not canceled) rentals by user ID
     public List<Transaction> getActiveRentalsByUser(String userId) {
         List<Transaction> activeRentals = new ArrayList<>();
         for (Transaction transaction : transactions) {
-            if (transaction.getUserId().equals(userId) && !transaction.isReturned()) {
+            if (transaction.getUserId().equals(userId) && transaction.isActive()) {
                 activeRentals.add(transaction);
             }
         }
         return activeRentals;
+    }
+
+    // Get canceled rentals by user ID
+    public List<Transaction> getCanceledRentalsByUser(String userId) {
+        List<Transaction> canceledRentals = new ArrayList<>();
+        for (Transaction transaction : transactions) {
+            if (transaction.getUserId().equals(userId) && transaction.isCanceled()) {
+                canceledRentals.add(transaction);
+            }
+        }
+        return canceledRentals;
     }
 
     // Get overdue rentals
@@ -332,7 +425,7 @@ public class RentalManager {
         Date currentDate = new Date();
 
         for (Transaction transaction : transactions) {
-            if (!transaction.isReturned() && currentDate.after(transaction.getDueDate())) {
+            if (transaction.isActive() && currentDate.after(transaction.getDueDate())) {
                 overdueRentals.add(transaction);
             }
         }
@@ -346,7 +439,7 @@ public class RentalManager {
 
         for (Transaction transaction : transactions) {
             if (transaction.getUserId().equals(userId) &&
-                    !transaction.isReturned() &&
+                    transaction.isActive() &&
                     currentDate.after(transaction.getDueDate())) {
                 overdueRentals.add(transaction);
             }
@@ -369,10 +462,10 @@ public class RentalManager {
     public boolean deleteTransaction(String transactionId) {
         for (int i = 0; i < transactions.size(); i++) {
             if (transactions.get(i).getTransactionId().equals(transactionId)) {
-                // If the transaction is for a movie that hasn't been returned,
+                // If the transaction is for a movie that hasn't been returned or canceled,
                 // make the movie available again
                 Transaction transaction = transactions.get(i);
-                if (!transaction.isReturned()) {
+                if (transaction.isActive()) {
                     Movie movie = movieManager.getMovieById(transaction.getMovieId());
                     if (movie != null) {
                         movie.setAvailable(true);
@@ -393,7 +486,7 @@ public class RentalManager {
         for (Transaction transaction : transactions) {
             if (transaction.getUserId().equals(userId) &&
                     transaction.getMovieId().equals(movieId) &&
-                    !transaction.isReturned()) {
+                    transaction.isActive()) {
                 return true;
             }
         }
@@ -404,7 +497,7 @@ public class RentalManager {
     public double getTotalRentalFeesByUser(String userId) {
         double total = 0.0;
         for (Transaction transaction : transactions) {
-            if (transaction.getUserId().equals(userId)) {
+            if (transaction.getUserId().equals(userId) && !transaction.isCanceled()) {
                 total += transaction.getRentalFee();
                 total += transaction.getLateFee();
             }

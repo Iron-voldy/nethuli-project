@@ -4,6 +4,7 @@ import java.util.Date;
 
 /**
  * Transaction class representing a movie rental transaction
+ * Updated with additional properties for CRUD operations
  */
 public class Transaction {
     private String transactionId;
@@ -15,10 +16,14 @@ public class Transaction {
     private double rentalFee;
     private double lateFee;
     private boolean returned;
+    private boolean canceled;
+    private String cancellationReason;
+    private Date cancellationDate;
 
     // Constructor with all fields
     public Transaction(String transactionId, String userId, String movieId, Date rentalDate,
-                       Date dueDate, Date returnDate, double rentalFee, double lateFee, boolean returned) {
+                       Date dueDate, Date returnDate, double rentalFee, double lateFee,
+                       boolean returned, boolean canceled, String cancellationReason, Date cancellationDate) {
         this.transactionId = transactionId;
         this.userId = userId;
         this.movieId = movieId;
@@ -28,6 +33,9 @@ public class Transaction {
         this.rentalFee = rentalFee;
         this.lateFee = lateFee;
         this.returned = returned;
+        this.canceled = canceled;
+        this.cancellationReason = cancellationReason;
+        this.cancellationDate = cancellationDate;
     }
 
     // Constructor without return date and late fee (for new rentals)
@@ -42,6 +50,9 @@ public class Transaction {
         this.returnDate = null;
         this.lateFee = 0.0;
         this.returned = false;
+        this.canceled = false;
+        this.cancellationReason = null;
+        this.cancellationDate = null;
     }
 
     // Default constructor
@@ -55,6 +66,9 @@ public class Transaction {
         this.rentalFee = 0.0;
         this.lateFee = 0.0;
         this.returned = false;
+        this.canceled = false;
+        this.cancellationReason = null;
+        this.cancellationDate = null;
     }
 
     // Getters and Setters
@@ -130,6 +144,30 @@ public class Transaction {
         this.returned = returned;
     }
 
+    public boolean isCanceled() {
+        return canceled;
+    }
+
+    public void setCanceled(boolean canceled) {
+        this.canceled = canceled;
+    }
+
+    public String getCancellationReason() {
+        return cancellationReason;
+    }
+
+    public void setCancellationReason(String cancellationReason) {
+        this.cancellationReason = cancellationReason;
+    }
+
+    public Date getCancellationDate() {
+        return cancellationDate;
+    }
+
+    public void setCancellationDate(Date cancellationDate) {
+        this.cancellationDate = cancellationDate;
+    }
+
     // Calculate days overdue if the movie is late
     public int calculateDaysOverdue() {
         if (returned && returnDate != null && returnDate.after(dueDate)) {
@@ -139,12 +177,38 @@ public class Transaction {
         return 0;
     }
 
+    // Calculate days remaining in the rental period
+    public int calculateDaysRemaining() {
+        if (returned || canceled) {
+            return 0;
+        }
+
+        Date currentDate = new Date();
+        if (currentDate.after(dueDate)) {
+            return 0; // No days remaining, already overdue
+        }
+
+        long diffInMillies = dueDate.getTime() - currentDate.getTime();
+        return (int) (diffInMillies / (1000 * 60 * 60 * 24)) + 1; // +1 to include today
+    }
+
+    // Get rental duration in days
+    public int getRentalDuration() {
+        long diffInMillies = dueDate.getTime() - rentalDate.getTime();
+        return (int) (diffInMillies / (1000 * 60 * 60 * 24)) + 1; // +1 to include the start date
+    }
+
     // Check if the rental is currently overdue
     public boolean isOverdue() {
-        if (returned) {
+        if (returned || canceled) {
             return false;
         }
         return new Date().after(dueDate);
+    }
+
+    // Check if the rental is active (not returned and not canceled)
+    public boolean isActive() {
+        return !returned && !canceled;
     }
 
     // Convert transaction to string representation for file storage
@@ -157,14 +221,19 @@ public class Transaction {
                 (returnDate != null ? returnDate.getTime() : "0") + "," +
                 rentalFee + "," +
                 lateFee + "," +
-                returned;
+                returned + "," +
+                canceled + "," +
+                (cancellationReason != null ? cancellationReason.replace(",", "\\,") : "") + "," +
+                (cancellationDate != null ? cancellationDate.getTime() : "0");
     }
 
     // Create transaction from string representation (from file)
     public static Transaction fromFileString(String fileString) {
-        String[] parts = fileString.split(",");
+        String[] parts = fileString.split(",(?=([^\\\\]|\\\\[^,])*$)", -1); // Split by comma, accounting for escaped commas
+
+        Transaction transaction = new Transaction();
+
         if (parts.length >= 9) {
-            Transaction transaction = new Transaction();
             transaction.setTransactionId(parts[0]);
             transaction.setUserId(parts[1]);
             transaction.setMovieId(parts[2]);
@@ -179,6 +248,25 @@ public class Transaction {
             transaction.setRentalFee(Double.parseDouble(parts[6]));
             transaction.setLateFee(Double.parseDouble(parts[7]));
             transaction.setReturned(Boolean.parseBoolean(parts[8]));
+
+            // Handle additional fields if they exist
+            if (parts.length >= 10) {
+                transaction.setCanceled(Boolean.parseBoolean(parts[9]));
+            }
+
+            if (parts.length >= 11) {
+                String reason = parts[10];
+                if (!reason.isEmpty()) {
+                    transaction.setCancellationReason(reason.replace("\\,", ","));
+                }
+            }
+
+            if (parts.length >= 12) {
+                long cancelDateLong = Long.parseLong(parts[11]);
+                if (cancelDateLong > 0) {
+                    transaction.setCancellationDate(new Date(cancelDateLong));
+                }
+            }
 
             return transaction;
         }
@@ -197,6 +285,9 @@ public class Transaction {
                 ", rentalFee=" + rentalFee +
                 ", lateFee=" + lateFee +
                 ", returned=" + returned +
+                ", canceled=" + canceled +
+                ", cancellationReason='" + cancellationReason + '\'' +
+                ", cancellationDate=" + cancellationDate +
                 '}';
     }
 }
