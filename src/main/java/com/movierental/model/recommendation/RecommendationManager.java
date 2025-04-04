@@ -3,6 +3,8 @@ package com.movierental.model.recommendation;
 import java.io.*;
 import java.util.*;
 
+import javax.servlet.ServletContext;
+
 import com.movierental.model.movie.Movie;
 import com.movierental.model.movie.MovieManager;
 import com.movierental.model.rental.RentalManager;
@@ -17,46 +19,90 @@ import com.movierental.model.watchlist.RecentlyWatched;
  * RecommendationManager class handles all recommendation-related operations
  */
 public class RecommendationManager {
-    private static final String RECOMMENDATION_FILE_PATH = "data/recommendations.txt";
+    private static final String RECOMMENDATION_FILE_NAME = "recommendations.txt";
     private List<Recommendation> recommendations;
     private MovieManager movieManager;
     private ReviewManager reviewManager;
     private RentalManager rentalManager;
     private WatchlistManager watchlistManager;
+    private ServletContext servletContext;
+    private String dataFilePath;
 
     // Constructor
     public RecommendationManager() {
-        recommendations = new ArrayList<>();
-        movieManager = new MovieManager();
-        reviewManager = new ReviewManager();
-        rentalManager = new RentalManager();
-        watchlistManager = new WatchlistManager();
-        loadRecommendations();
+        this(null);
     }
 
-    // Constructor with existing managers
-    public RecommendationManager(MovieManager movieManager, ReviewManager reviewManager,
-                                 RentalManager rentalManager, WatchlistManager watchlistManager) {
+    // Constructor with ServletContext
+    public RecommendationManager(ServletContext servletContext) {
+        this.servletContext = servletContext;
         recommendations = new ArrayList<>();
-        this.movieManager = movieManager;
-        this.reviewManager = reviewManager;
-        this.rentalManager = rentalManager;
-        this.watchlistManager = watchlistManager;
+        initializeFilePath();
         loadRecommendations();
+
+        // Initialize other managers with the same ServletContext
+        movieManager = new MovieManager(servletContext);
+        reviewManager = new ReviewManager(servletContext);
+        rentalManager = new RentalManager(servletContext);
+        watchlistManager = new WatchlistManager(servletContext);
+    }
+
+    // Initialize the file path
+    private void initializeFilePath() {
+        if (servletContext != null) {
+            // Use WEB-INF/data within the application context
+            String webInfDataPath = "/WEB-INF/data";
+            dataFilePath = servletContext.getRealPath(webInfDataPath) + File.separator + RECOMMENDATION_FILE_NAME;
+
+            // Make sure directory exists
+            File dataDir = new File(servletContext.getRealPath(webInfDataPath));
+            if (!dataDir.exists()) {
+                boolean created = dataDir.mkdirs();
+                System.out.println("Created WEB-INF/data directory: " + dataDir.getAbsolutePath() + " - Success: " + created);
+            }
+        } else {
+            // Fallback to simple data directory if not in web context
+            String dataPath = "data";
+            dataFilePath = dataPath + File.separator + RECOMMENDATION_FILE_NAME;
+
+            // Make sure directory exists
+            File dataDir = new File(dataPath);
+            if (!dataDir.exists()) {
+                boolean created = dataDir.mkdirs();
+                System.out.println("Created fallback data directory: " + dataPath + " - Success: " + created);
+            }
+        }
+
+        System.out.println("RecommendationManager: Using data file path: " + dataFilePath);
+
+        // Ensure the file exists
+        try {
+            File file = new File(dataFilePath);
+            if (!file.exists()) {
+                file.createNewFile();
+                System.out.println("Created new recommendations file: " + dataFilePath);
+            }
+        } catch (IOException e) {
+            System.err.println("Error creating recommendations file: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     // Load recommendations from file
     private void loadRecommendations() {
-        File file = new File(RECOMMENDATION_FILE_PATH);
-
-        // Create directory if it doesn't exist
-        file.getParentFile().mkdirs();
+        File file = new File(dataFilePath);
 
         if (!file.exists()) {
             try {
+                // Create parent directories if they don't exist
+                if (file.getParentFile() != null) {
+                    file.getParentFile().mkdirs();
+                }
                 file.createNewFile();
+                System.out.println("Created new recommendations file: " + dataFilePath);
             } catch (IOException e) {
                 System.err.println("Error creating recommendations file: " + e.getMessage());
+                e.printStackTrace();
             }
             return;
         }
@@ -81,20 +127,32 @@ public class RecommendationManager {
                     recommendations.add(recommendation);
                 }
             }
+            System.out.println("Loaded " + recommendations.size() + " recommendations from " + dataFilePath);
         } catch (IOException e) {
             System.err.println("Error loading recommendations: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
     // Save recommendations to file
     private void saveRecommendations() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(RECOMMENDATION_FILE_PATH))) {
-            for (Recommendation recommendation : recommendations) {
-                writer.write(recommendation.toFileString());
-                writer.newLine();
+        try {
+            // Ensure parent directory exists
+            File file = new File(dataFilePath);
+            if (file.getParentFile() != null && !file.getParentFile().exists()) {
+                file.getParentFile().mkdirs();
             }
+
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(dataFilePath))) {
+                for (Recommendation recommendation : recommendations) {
+                    writer.write(recommendation.toFileString());
+                    writer.newLine();
+                }
+            }
+            System.out.println("Saved " + recommendations.size() + " recommendations to " + dataFilePath);
         } catch (IOException e) {
             System.err.println("Error saving recommendations: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -138,8 +196,17 @@ public class RecommendationManager {
                 }
             }
 
-            // Sort by rating
-            genreMovies.sort((m1, m2) -> Double.compare(m2.getRating(), m1.getRating()));
+            // Sort by rating using bubble sort algorithm (for educational purposes)
+            for (int i = 0; i < genreMovies.size() - 1; i++) {
+                for (int j = 0; j < genreMovies.size() - i - 1; j++) {
+                    if (genreMovies.get(j).getRating() < genreMovies.get(j + 1).getRating()) {
+                        // Swap movies
+                        Movie temp = genreMovies.get(j);
+                        genreMovies.set(j, genreMovies.get(j + 1));
+                        genreMovies.set(j + 1, temp);
+                    }
+                }
+            }
 
             // Take top 5 movies per genre
             int genreRank = 1;
@@ -190,7 +257,7 @@ public class RecommendationManager {
             userMovieIds.add(item.getMovieId());
         }
 
-        // Get user's preferred genres
+        // Get user's preferred genres based on watched movies and watchlist
         Map<String, Integer> genreCounts = new HashMap<>();
         for (String movieId : userMovieIds) {
             Movie movie = movieManager.getMovieById(movieId);
@@ -200,9 +267,9 @@ public class RecommendationManager {
             }
         }
 
-        // Sort genres by preference
+        // Sort genres by preference (most watched first)
         List<Map.Entry<String, Integer>> sortedGenres = new ArrayList<>(genreCounts.entrySet());
-        sortedGenres.sort((g1, g2) -> g2.getValue().compareTo(g1.getValue()));
+        Collections.sort(sortedGenres, (g1, g2) -> g2.getValue().compareTo(g1.getValue()));
 
         // Recommend movies based on preferred genres
         int recommendationCount = 0;
@@ -217,12 +284,27 @@ public class RecommendationManager {
                 }
             }
 
-            // Sort by rating
-            genreMovies.sort((m1, m2) -> Double.compare(m2.getRating(), m1.getRating()));
+            // Sort by rating using bubble sort
+            for (int i = 0; i < genreMovies.size() - 1; i++) {
+                for (int j = 0; j < genreMovies.size() - i - 1; j++) {
+                    if (genreMovies.get(j).getRating() < genreMovies.get(j + 1).getRating()) {
+                        // Swap movies
+                        Movie temp = genreMovies.get(j);
+                        genreMovies.set(j, genreMovies.get(j + 1));
+                        genreMovies.set(j + 1, temp);
+                    }
+                }
+            }
 
             // Take top movies per genre
             for (int i = 0; i < Math.min(5, genreMovies.size()); i++) {
                 Movie movie = genreMovies.get(i);
+
+                // Calculate relevance score based on genre preference and movie rating
+                double genreWeight = (double) genreEntry.getValue() /
+                        Collections.max(genreCounts.values()); // Normalized to 0-1
+                double ratingWeight = movie.getRating() / 10.0; // Normalized to 0-1
+                double relevanceScore = 0.7 * genreWeight + 0.3 * ratingWeight; // Weighted average
 
                 PersonalRecommendation recommendation = new PersonalRecommendation();
                 recommendation.setRecommendationId(UUID.randomUUID().toString());
@@ -232,7 +314,7 @@ public class RecommendationManager {
                 recommendation.setScore(movie.getRating());
                 recommendation.setReason("Based on your interest in " + genre + " movies");
                 recommendation.setBaseSource("genre-preference");
-                recommendation.setRelevanceScore(0.8);
+                recommendation.setRelevanceScore(relevanceScore);
 
                 personalRecommendations.add(recommendation);
                 recommendations.add(recommendation);
@@ -262,7 +344,7 @@ public class RecommendationManager {
                     recommendation.setScore(movie.getRating());
                     recommendation.setReason("This is one of our highest-rated movies");
                     recommendation.setBaseSource("top-rated");
-                    recommendation.setRelevanceScore(0.6);
+                    recommendation.setRelevanceScore(0.6); // Slightly lower relevance as not based on preferences
 
                     personalRecommendations.add(recommendation);
                     recommendations.add(recommendation);
@@ -328,7 +410,12 @@ public class RecommendationManager {
         }
 
         // Sort by rank
-        topRated.sort(Comparator.comparingInt(GeneralRecommendation::getRank));
+        Collections.sort(topRated, new Comparator<GeneralRecommendation>() {
+            @Override
+            public int compare(GeneralRecommendation r1, GeneralRecommendation r2) {
+                return Integer.compare(r1.getRank(), r2.getRank());
+            }
+        });
 
         // Generate if empty
         if (topRated.isEmpty()) {
@@ -353,7 +440,12 @@ public class RecommendationManager {
         }
 
         // Sort by rank
-        genreRecs.sort(Comparator.comparingInt(GeneralRecommendation::getRank));
+        Collections.sort(genreRecs, new Comparator<GeneralRecommendation>() {
+            @Override
+            public int compare(GeneralRecommendation r1, GeneralRecommendation r2) {
+                return Integer.compare(r1.getRank(), r2.getRank());
+            }
+        });
 
         // Generate if empty
         if (genreRecs.isEmpty()) {
@@ -383,10 +475,87 @@ public class RecommendationManager {
         return false;
     }
 
-    // Delete all recommendations for a user (e.g. when user is deleted)
-    public void deleteUserRecommendations(String userId) {
-        recommendations.removeIf(rec -> userId.equals(rec.getUserId()));
+    // Add a recommendation
+    public boolean addRecommendation(Recommendation recommendation) {
+        if (recommendation == null || recommendation.getRecommendationId() == null) {
+            return false;
+        }
+
+        // Generate ID if not provided
+        if (recommendation.getRecommendationId().isEmpty()) {
+            recommendation.setRecommendationId(UUID.randomUUID().toString());
+        }
+
+        // Set generation date if not set
+        if (recommendation.getGeneratedDate() == null) {
+            recommendation.setGeneratedDate(new Date());
+        }
+
+        recommendations.add(recommendation);
         saveRecommendations();
+        return true;
+    }
+
+    // Update a recommendation
+    public boolean updateRecommendation(Recommendation updatedRecommendation) {
+        if (updatedRecommendation == null || updatedRecommendation.getRecommendationId() == null) {
+            return false;
+        }
+
+        for (int i = 0; i < recommendations.size(); i++) {
+            if (recommendations.get(i).getRecommendationId().equals(updatedRecommendation.getRecommendationId())) {
+                recommendations.set(i, updatedRecommendation);
+                saveRecommendations();
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    // Delete a recommendation by ID
+    public boolean deleteRecommendation(String recommendationId) {
+        if (recommendationId == null) {
+            return false;
+        }
+
+        for (int i = 0; i < recommendations.size(); i++) {
+            if (recommendations.get(i).getRecommendationId().equals(recommendationId)) {
+                recommendations.remove(i);
+                saveRecommendations();
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    // Get a recommendation by ID
+    public Recommendation getRecommendationById(String recommendationId) {
+        if (recommendationId == null) {
+            return null;
+        }
+
+        for (Recommendation rec : recommendations) {
+            if (rec.getRecommendationId().equals(recommendationId)) {
+                return rec;
+            }
+        }
+
+        return null;
+    }
+
+    // Delete all recommendations for a user (e.g., when user is deleted)
+    public boolean deleteUserRecommendations(String userId) {
+        if (userId == null) {
+            return false;
+        }
+
+        boolean removed = recommendations.removeIf(rec -> userId.equals(rec.getUserId()));
+        if (removed) {
+            saveRecommendations();
+        }
+        return removed;
     }
 
     // Get all available genres
@@ -401,5 +570,20 @@ public class RecommendationManager {
     // Get all recommendations
     public List<Recommendation> getAllRecommendations() {
         return new ArrayList<>(recommendations);
+    }
+
+    // Set ServletContext (can be used to update the context after initialization)
+    public void setServletContext(ServletContext servletContext) {
+        this.servletContext = servletContext;
+        initializeFilePath();
+        // Reload recommendations with the new file path
+        recommendations.clear();
+        loadRecommendations();
+
+        // Update other managers
+        movieManager.setServletContext(servletContext);
+        reviewManager.setServletContext(servletContext);
+        rentalManager.setServletContext(servletContext);
+        watchlistManager.setServletContext(servletContext);
     }
 }

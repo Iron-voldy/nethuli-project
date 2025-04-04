@@ -73,14 +73,16 @@ public class ReviewManager {
         File file = new File(dataFilePath);
 
         // Create directory if it doesn't exist
-        if (file.getParentFile() != null) {
-            file.getParentFile().mkdirs();
+        if (file.getParentFile() != null && !file.getParentFile().exists()) {
+            boolean created = file.getParentFile().mkdirs();
+            System.out.println("Created directory for reviews: " + file.getParentFile().getAbsolutePath() + " - Success: " + created);
         }
 
+        // Create file if it doesn't exist
         if (!file.exists()) {
             try {
-                file.createNewFile();
-                System.out.println("Created reviews file: " + dataFilePath);
+                boolean created = file.createNewFile();
+                System.out.println("Created reviews file: " + dataFilePath + " - Success: " + created);
             } catch (IOException e) {
                 System.err.println("Error creating reviews file: " + e.getMessage());
                 e.printStackTrace();
@@ -118,10 +120,19 @@ public class ReviewManager {
 
     // Save reviews to file
     private void saveReviews() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(dataFilePath))) {
-            for (Review review : reviews) {
-                writer.write(review.toFileString());
-                writer.newLine();
+        try {
+            // Ensure parent directory exists
+            File file = new File(dataFilePath);
+            if (file.getParentFile() != null && !file.getParentFile().exists()) {
+                boolean created = file.getParentFile().mkdirs();
+                System.out.println("Created directory for reviews: " + file.getParentFile().getAbsolutePath() + " - Success: " + created);
+            }
+
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(dataFilePath))) {
+                for (Review review : reviews) {
+                    writer.write(review.toFileString());
+                    writer.newLine();
+                }
             }
             System.out.println("Reviews saved successfully to: " + dataFilePath);
         } catch (IOException e) {
