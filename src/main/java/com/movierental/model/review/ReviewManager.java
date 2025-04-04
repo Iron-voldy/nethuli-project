@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.servlet.ServletContext;
+
 import com.movierental.model.movie.Movie;
 import com.movierental.model.movie.MovieManager;
 import com.movierental.model.rental.RentalManager;
@@ -19,27 +21,69 @@ import com.movierental.model.rental.Transaction;
  * ReviewManager class handles all review-related operations
  */
 public class ReviewManager {
-    private static final String REVIEW_FILE_PATH = "data/reviews.txt";
+    private static final String REVIEW_FILE_NAME = "reviews.txt";
     private List<Review> reviews;
+    private ServletContext servletContext;
+    private String dataFilePath;
 
-    // Constructor
+    // Constructor without ServletContext (for backward compatibility)
     public ReviewManager() {
+        this(null);
+    }
+
+    // Constructor with ServletContext
+    public ReviewManager(ServletContext servletContext) {
+        this.servletContext = servletContext;
         reviews = new ArrayList<>();
+        initializeFilePath();
         loadReviews();
+    }
+
+    // Initialize file path based on ServletContext
+    private void initializeFilePath() {
+        if (servletContext != null) {
+            // Use WEB-INF/data within the application context
+            String webInfDataPath = "/WEB-INF/data";
+            dataFilePath = servletContext.getRealPath(webInfDataPath) + File.separator + REVIEW_FILE_NAME;
+
+            // Make sure directory exists
+            File dataDir = new File(servletContext.getRealPath(webInfDataPath));
+            if (!dataDir.exists()) {
+                boolean created = dataDir.mkdirs();
+                System.out.println("Created WEB-INF/data directory: " + dataDir.getAbsolutePath() + " - Success: " + created);
+            }
+        } else {
+            // Fallback to simple data directory if not in web context
+            String dataPath = "data";
+            dataFilePath = dataPath + File.separator + REVIEW_FILE_NAME;
+
+            // Make sure directory exists
+            File dataDir = new File(dataPath);
+            if (!dataDir.exists()) {
+                boolean created = dataDir.mkdirs();
+                System.out.println("Created fallback data directory: " + dataPath + " - Success: " + created);
+            }
+        }
+
+        System.out.println("ReviewManager: Using data file path: " + dataFilePath);
     }
 
     // Load reviews from file
     private void loadReviews() {
-        File file = new File(REVIEW_FILE_PATH);
+        File file = new File(dataFilePath);
 
         // Create directory if it doesn't exist
-        file.getParentFile().mkdirs();
+        if (file.getParentFile() != null) {
+            file.getParentFile().mkdirs();
+        }
 
         if (!file.exists()) {
             try {
                 file.createNewFile();
+                System.out.println("Created reviews file: " + dataFilePath);
             } catch (IOException e) {
                 System.err.println("Error creating reviews file: " + e.getMessage());
+                e.printStackTrace();
             }
             return;
         }
@@ -62,22 +106,27 @@ public class ReviewManager {
 
                 if (review != null) {
                     reviews.add(review);
+                    System.out.println("Loaded review: " + review.getReviewId());
                 }
             }
+            System.out.println("Total reviews loaded: " + reviews.size());
         } catch (IOException e) {
             System.err.println("Error loading reviews: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
     // Save reviews to file
     private void saveReviews() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(REVIEW_FILE_PATH))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(dataFilePath))) {
             for (Review review : reviews) {
                 writer.write(review.toFileString());
                 writer.newLine();
             }
+            System.out.println("Reviews saved successfully to: " + dataFilePath);
         } catch (IOException e) {
             System.err.println("Error saving reviews: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -123,7 +172,7 @@ public class ReviewManager {
         }
 
         // Check if the transaction exists and is valid for review
-        RentalManager rentalManager = new RentalManager();
+        RentalManager rentalManager = new RentalManager(servletContext);
         Transaction transaction = rentalManager.getTransactionById(transactionId);
 
         if (transaction == null || !transaction.isReturned() ||
@@ -399,7 +448,7 @@ public class ReviewManager {
         averageRating = Math.round(averageRating * 10.0) / 10.0;
 
         // Update movie rating
-        MovieManager movieManager = new MovieManager();
+        MovieManager movieManager = new MovieManager(servletContext);
         Movie movie = movieManager.getMovieById(movieId);
 
         if (movie != null) {
@@ -416,5 +465,14 @@ public class ReviewManager {
             return 5;
         }
         return rating;
+    }
+
+    // Set ServletContext (can be used to update the context after initialization)
+    public void setServletContext(ServletContext servletContext) {
+        this.servletContext = servletContext;
+        initializeFilePath();
+        // Reload reviews with the new file path
+        reviews.clear();
+        loadReviews();
     }
 }

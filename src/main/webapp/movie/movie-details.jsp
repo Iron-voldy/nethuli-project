@@ -4,6 +4,7 @@
 <%@ page import="com.movierental.model.movie.NewRelease" %>
 <%@ page import="com.movierental.model.movie.ClassicMovie" %>
 <%@ page import="com.movierental.model.movie.MovieManager" %>
+<%@ page import="com.movierental.model.review.ReviewManager" %>
 <%@ page import="java.text.SimpleDateFormat" %>
 <!DOCTYPE html>
 <html lang="en">
@@ -610,17 +611,56 @@
                     </div>
                 </div>
 
-                <!-- Reviews Card -->
-                <div class="card">
+                <!-- Reviews Summary Section -->
+                <div class="card mt-3">
                     <div class="card-header">
                         <i class="bi bi-star"></i> Reviews
                     </div>
-                    <div class="card-body p-4 text-center">
-                        <i class="bi bi-chat-square-text" style="font-size: 3rem; color: #444;"></i>
-                        <p class="mt-3 text-secondary">No reviews yet</p>
-                        <a href="<%= request.getContextPath() %>/movie-reviews?movieId=<%= movie.getMovieId() %>" class="btn btn-neon mt-2">
-                            <i class="bi bi-pencil"></i> Write a Review
-                        </a>
+                    <div class="card-body p-4">
+                        <%
+                            ReviewManager reviewManager = new ReviewManager(application);
+                            double avgRating = reviewManager.calculateAverageRating(movie.getMovieId());
+                            int reviewCount = reviewManager.getReviewsByMovie(movie.getMovieId()).size();
+
+                            if(reviewCount > 0) {
+                        %>
+                            <div class="d-flex align-items-center mb-3">
+                                <h4 class="me-3 mb-0"><%= String.format("%.1f", avgRating) %></h4>
+                                <div>
+                                    <div class="rating-stars">
+                                        <%
+                                            int reviewFullStars = (int) Math.floor(avgRating);
+                                            boolean reviewHalfStar = (avgRating - reviewFullStars) >= 0.5;
+
+                                            for(int i = 0; i < reviewFullStars; i++) {
+                                                out.print("<i class='bi bi-star-fill'></i> ");
+                                            }
+
+                                            if(reviewHalfStar) {
+                                                out.print("<i class='bi bi-star-half'></i> ");
+                                            }
+
+                                            int reviewEmptyStars = 5 - reviewFullStars - (reviewHalfStar ? 1 : 0);
+                                            for(int i = 0; i < reviewEmptyStars; i++) {
+                                                out.print("<i class='bi bi-star'></i> ");
+                                            }
+                                        %>
+                                    </div>
+                                    <div class="text-muted"><%= reviewCount %> reviews</div>
+                                </div>
+                            </div>
+                        <% } else { %>
+                            <p class="text-center mb-3">No reviews yet.</p>
+                        <% } %>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="<%= request.getContextPath() %>/movie-reviews?movieId=<%= movie.getMovieId() %>" class="btn btn-outline-neon">
+                                <i class="bi bi-eye"></i> View All Reviews
+                            </a>
+                            <a href="<%= request.getContextPath() %>/add-review?movieId=<%= movie.getMovieId() %>" class="btn btn-neon">
+                                <i class="bi bi-pencil"></i> Write a Review
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>

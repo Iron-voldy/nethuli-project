@@ -44,7 +44,7 @@ public class UpdateReviewServlet extends HttpServlet {
         }
 
         // Get review details
-        ReviewManager reviewManager = new ReviewManager();
+        ReviewManager reviewManager = new ReviewManager(getServletContext());
         Review review = reviewManager.getReviewById(reviewId);
 
         if (review == null) {
@@ -61,7 +61,7 @@ public class UpdateReviewServlet extends HttpServlet {
         }
 
         // Get movie details
-        MovieManager movieManager = new MovieManager();
+        MovieManager movieManager = new MovieManager(getServletContext());
         Movie movie = movieManager.getMovieById(review.getMovieId());
 
         if (movie == null) {
@@ -73,6 +73,12 @@ public class UpdateReviewServlet extends HttpServlet {
         // Set attributes for the JSP
         request.setAttribute("review", review);
         request.setAttribute("movie", movie);
+
+        // Check if we should show delete confirmation dialog
+        String showDeleteConfirm = request.getParameter("showDeleteConfirm");
+        if ("true".equals(showDeleteConfirm)) {
+            request.setAttribute("showDeleteConfirm", true);
+        }
 
         // Forward to the edit review page
         request.getRequestDispatcher("/review/edit-review.jsp").forward(request, response);
@@ -118,7 +124,7 @@ public class UpdateReviewServlet extends HttpServlet {
             }
 
             // Get review manager
-            ReviewManager reviewManager = new ReviewManager();
+            ReviewManager reviewManager = new ReviewManager(getServletContext());
 
             // Check if review exists and belongs to the user
             Review existingReview = reviewManager.getReviewById(reviewId);

@@ -52,7 +52,7 @@ public class AddReviewServlet extends HttpServlet {
         String userId = (session != null) ? (String) session.getAttribute("userId") : null;
 
         // Check if user has already reviewed this movie
-        ReviewManager reviewManager = new ReviewManager();
+        ReviewManager reviewManager = new ReviewManager(getServletContext());
         boolean userHasReviewed = false;
 
         if (userId != null) {
@@ -105,7 +105,7 @@ public class AddReviewServlet extends HttpServlet {
 
             // Validate rating (1-5)
             if (rating < 1 || rating > 5) {
-                request.setAttribute("errorMessage", "Rating must be between 1 and a5");
+                request.setAttribute("errorMessage", "Rating must be between 1 and 5");
                 doGet(request, response);
                 return;
             }
@@ -124,7 +124,7 @@ public class AddReviewServlet extends HttpServlet {
             HttpSession session = request.getSession(false);
             String userId = (session != null) ? (String) session.getAttribute("userId") : null;
 
-            ReviewManager reviewManager = new ReviewManager();
+            ReviewManager reviewManager = new ReviewManager(getServletContext());
             Review review = null;
 
             if (userId != null) {

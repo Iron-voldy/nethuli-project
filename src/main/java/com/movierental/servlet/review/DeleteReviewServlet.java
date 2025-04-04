@@ -42,7 +42,7 @@ public class DeleteReviewServlet extends HttpServlet {
         }
 
         // Get review details
-        ReviewManager reviewManager = new ReviewManager();
+        ReviewManager reviewManager = new ReviewManager(getServletContext());
         Review review = reviewManager.getReviewById(reviewId);
 
         if (review == null) {
@@ -117,7 +117,7 @@ public class DeleteReviewServlet extends HttpServlet {
         }
 
         // Get review details
-        ReviewManager reviewManager = new ReviewManager();
+        ReviewManager reviewManager = new ReviewManager(getServletContext());
         Review review = reviewManager.getReviewById(reviewId);
 
         if (review == null) {

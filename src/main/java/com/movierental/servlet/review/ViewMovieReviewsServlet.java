@@ -20,7 +20,7 @@ import com.movierental.model.user.User;
 /**
  * Servlet for displaying all reviews for a specific movie
  */
-@WebServlet("/view-movie-reviews")
+@WebServlet("/movie-reviews")
 public class ViewMovieReviewsServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
@@ -45,7 +45,7 @@ public class ViewMovieReviewsServlet extends HttpServlet {
         }
 
         // Get all reviews for the movie
-        ReviewManager reviewManager = new ReviewManager();
+        ReviewManager reviewManager = new ReviewManager(getServletContext());
         List<Review> reviews = reviewManager.getReviewsByMovie(movieId);
 
         // Get review statistics

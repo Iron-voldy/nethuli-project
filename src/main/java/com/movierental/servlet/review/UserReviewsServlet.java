@@ -40,11 +40,11 @@ public class UserReviewsServlet extends HttpServlet {
         }
 
         // Get reviews by the user
-        ReviewManager reviewManager = new ReviewManager();
+        ReviewManager reviewManager = new ReviewManager(getServletContext());
         List<Review> userReviews = reviewManager.getReviewsByUser(userId);
 
         // Get movies for each review
-        MovieManager movieManager = new MovieManager();
+        MovieManager movieManager = new MovieManager(getServletContext());
         Map<String, Movie> movieMap = new HashMap<>();
 
         for (Review review : userReviews) {
