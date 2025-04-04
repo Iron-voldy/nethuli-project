@@ -278,7 +278,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="<%= request.getContextPath() %>/watchlist/watchlist.jsp">
+                        <a class="nav-link" href="<%= request.getContextPath() %>/view-watchlist">
                             <i class="bi bi-bookmark-star"></i> Watchlist
                         </a>
                     </li>

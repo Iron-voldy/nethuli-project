@@ -81,6 +81,36 @@ public class ReviewManager {
         }
     }
 
+    // Add a regular review (from a logged-in user who may not have rented the movie)
+    public Review addRegularReview(String userId, String userName, String movieId, String comment, int rating) {
+        // Check if user has already reviewed this movie
+        for (Review existingReview : reviews) {
+            if (existingReview.getMovieId().equals(movieId) &&
+                    userId.equals(existingReview.getUserId())) {
+                return null; // User already reviewed this movie
+            }
+        }
+
+        // Create the review
+        Review review = new Review();
+        review.setReviewId(UUID.randomUUID().toString());
+        review.setUserId(userId);
+        review.setUserName(userName);
+        review.setMovieId(movieId);
+        review.setComment(comment);
+        review.setRating(validateRating(rating));
+        review.setReviewDate(new Date());
+
+        // Add to the list and save
+        reviews.add(review);
+        saveReviews();
+
+        // Update movie rating
+        updateMovieRating(movieId);
+
+        return review;
+    }
+
     // Add a verified review (from a user who rented the movie)
     public VerifiedReview addVerifiedReview(String userId, String userName, String movieId,
                                             String transactionId, String comment, int rating) {
