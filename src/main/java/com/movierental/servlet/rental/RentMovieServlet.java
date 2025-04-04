@@ -34,6 +34,7 @@ public class RentMovieServlet extends HttpServlet {
             return;
         }
 
+        // Create MovieManager with ServletContext
         MovieManager movieManager = new MovieManager(getServletContext());
         Movie movie = movieManager.getMovieById(movieId);
 
@@ -90,13 +91,19 @@ public class RentMovieServlet extends HttpServlet {
                 return;
             }
 
-            // Managers with ServletContext
-            RentalManager rentalManager = new RentalManager();
+            // Create managers with ServletContext
             UserManager userManager = new UserManager(getServletContext());
             MovieManager movieManager = new MovieManager(getServletContext());
+            RentalManager rentalManager = new RentalManager(getServletContext());
 
             // Get user details
             User user = userManager.getUserById(userId);
+            if (user == null) {
+                session.setAttribute("errorMessage", "User not found");
+                response.sendRedirect(request.getContextPath() + "/login");
+                return;
+            }
+
             int activeRentals = rentalManager.getActiveRentalsByUser(userId).size();
 
             System.out.println("Active Rentals: " + activeRentals);

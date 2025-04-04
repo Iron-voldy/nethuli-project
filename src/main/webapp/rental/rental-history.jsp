@@ -6,6 +6,7 @@
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.Date" %>
+<%@ page import="java.util.ArrayList" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -321,6 +322,11 @@
         List<Transaction> overdueRentals = (List<Transaction>) request.getAttribute("overdueRentals");
         Map<String, Movie> movieMap = (Map<String, Movie>) request.getAttribute("movieMap");
 
+        // Ensure the lists are not null
+        activeRentals = activeRentals != null ? activeRentals : new ArrayList<>();
+        rentalHistory = rentalHistory != null ? rentalHistory : new ArrayList<>();
+        overdueRentals = overdueRentals != null ? overdueRentals : new ArrayList<>();
+
         // Date formatter
         SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy");
     %>
@@ -350,7 +356,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="<%= request.getContextPath() %>/watchlist/watchlist.jsp">
+                        <a class="nav-link" href="<%= request.getContextPath() %>/view-watchlist">
                             <i class="bi bi-bookmark-star"></i> Watchlist
                         </a>
                     </li>
@@ -417,12 +423,13 @@
                             </thead>
                             <tbody>
                                 <% for (Transaction rental : overdueRentals) {
-                                    Movie movie = movieMap.get(rental.getMovieId());
-                                    if (movie != null) {
+                                    if (movieMap != null) {
+                                        Movie movie = movieMap.get(rental.getMovieId());
+                                        if (movie != null) {
 
-                                        // Calculate days overdue
-                                        long diffInMillies = new Date().getTime() - rental.getDueDate().getTime();
-                                        int daysOverdue = (int) (diffInMillies / (1000 * 60 * 60 * 24)) + 1; // +1 to include the due date
+                                            // Calculate days overdue
+                                            long diffInMillies = new Date().getTime() - rental.getDueDate().getTime();
+                                            int daysOverdue = (int) (diffInMillies / (1000 * 60 * 60 * 24)) + 1; // +1 to include the due date
                                 %>
                                     <tr>
                                         <td>
@@ -450,6 +457,7 @@
                                         </td>
                                     </tr>
                                 <%
+                                        }
                                     }
                                 } %>
                             </tbody>
@@ -461,7 +469,7 @@
                 <h2 class="section-title">
                     <i class="bi bi-film"></i> Currently Rented
                 </h2>
-                <% if (activeRentals != null && !activeRentals.isEmpty()) { %>
+                <% if (activeRentals != null && !activeRentals.isEmpty() && movieMap != null) { %>
                     <div class="table-responsive">
                         <table class="rental-table">
                             <thead>
@@ -541,7 +549,7 @@
                     </div>
                 <% } %>
 
-                <% if (rentalHistory != null && !rentalHistory.isEmpty()) { %>
+                <% if (rentalHistory != null && !rentalHistory.isEmpty() && movieMap != null) { %>
                     <div class="section-divider"></div>
                     <h2 class="section-title">
                         <i class="bi bi-clock-history"></i> Rental History

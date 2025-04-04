@@ -17,17 +17,12 @@ import com.movierental.model.movie.Movie;
 import com.movierental.model.movie.MovieManager;
 import com.movierental.model.rental.RentalManager;
 import com.movierental.model.rental.Transaction;
+import com.movierental.model.user.User;
 
-/**
- * Servlet for displaying rental history
- */
 @WebServlet("/rental-history")
 public class RentalHistoryServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Handles GET requests - display rental history
-     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -43,7 +38,7 @@ public class RentalHistoryServlet extends HttpServlet {
         String userId = (String) session.getAttribute("userId");
 
         // Get rental history from database
-        RentalManager rentalManager = new RentalManager();
+        RentalManager rentalManager = new RentalManager(getServletContext());
         List<Transaction> rentals = rentalManager.getTransactionsByUser(userId);
 
         // Get active rentals (not returned)
@@ -63,7 +58,7 @@ public class RentalHistoryServlet extends HttpServlet {
         List<Transaction> overdueRentals = rentalManager.getOverdueRentalsByUser(userId);
 
         // Fetch movie details for each transaction
-        MovieManager movieManager = new MovieManager();
+        MovieManager movieManager = new MovieManager(getServletContext());
         Map<String, Movie> movieMap = new HashMap<>();
 
         // Fill movie map for all rentals
@@ -76,6 +71,11 @@ public class RentalHistoryServlet extends HttpServlet {
                 }
             }
         }
+
+        // Debug logging
+        System.out.println("RentalHistoryServlet: Active Rentals - " + activeRentals.size());
+        System.out.println("RentalHistoryServlet: Rental History - " + rentalHistory.size());
+        System.out.println("RentalHistoryServlet: Overdue Rentals - " + overdueRentals.size());
 
         // Set data in request attributes
         request.setAttribute("activeRentals", activeRentals);

@@ -44,7 +44,7 @@ public class RentalConfirmationServlet extends HttpServlet {
 
         try {
             // Managers with ServletContext
-            RentalManager rentalManager = new RentalManager();
+            RentalManager rentalManager = new RentalManager(getServletContext());
             MovieManager movieManager = new MovieManager(getServletContext());
 
             // Retrieve transaction and movie details
@@ -73,6 +73,7 @@ public class RentalConfirmationServlet extends HttpServlet {
 
         } catch (Exception e) {
             e.printStackTrace();
+            session.setAttribute("errorMessage", "Error retrieving rental details: " + e.getMessage());
             response.sendRedirect(request.getContextPath() + "/rental-history");
         }
     }
