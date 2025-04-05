@@ -12,214 +12,237 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Movies - Movie Rental System</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Browse Movies - FilmFlux</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
-        /* Keep all existing CSS styles */
         :root {
-            --neon-blue: #00c8ff;
-            --neon-purple: #8a2be2;
-            --neon-pink: #ff00ff;
-            --dark-bg: #121212;
-            --card-bg: #1e1e1e;
-            --card-secondary: #2d2d2d;
-            --text-primary: #e0e0e0;
-            --text-secondary: #aaaaaa;
-            --input-bg: #333;
-            --input-border: #444;
+            --primary: #6C63FF;
+            --primary-dark: #5A52E0;
+            --secondary: #FF6584;
+            --dark: #151419;
+            --darker: #0F0E13;
+            --light: #F3F3F4;
+            --gray: #8B8B99;
+            --success: #4BD1A0;
+            --warning: #FFC965;
+            --danger: #FF6B78;
         }
 
         body {
-            background-color: var(--dark-bg);
-            color: var(--text-primary);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--dark);
+            color: var(--light);
             min-height: 100vh;
             padding-bottom: 60px;
-            background-image:
-                radial-gradient(circle at 90% 10%, rgba(0, 200, 255, 0.15) 0%, transparent 30%),
-                radial-gradient(circle at 10% 90%, rgba(255, 0, 255, 0.1) 0%, transparent 30%);
         }
 
+        /* Navbar Styles */
         .navbar {
-            background-color: rgba(30, 30, 30, 0.8);
+            background-color: rgba(15, 14, 19, 0.95);
             backdrop-filter: blur(10px);
-            border-bottom: 1px solid #333;
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px 0;
         }
 
         .navbar-brand {
-            font-weight: bold;
-            background: linear-gradient(to right, var(--neon-blue), var(--neon-purple));
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
             -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            font-size: 1.5rem;
+            -webkit-text-fill-color: transparent;
+            margin-right: 30px;
         }
 
         .nav-link {
-            color: var(--text-primary);
-            margin: 0 10px;
+            font-weight: 500;
+            color: var(--light);
+            margin: 0 15px;
             position: relative;
+            opacity: 0.8;
+            transition: all 0.3s ease;
         }
 
-        .nav-link:hover {
-            color: var(--neon-blue);
+        .nav-link:hover, .nav-link.active {
+            opacity: 1;
+            color: var(--primary);
         }
 
         .nav-link::after {
             content: '';
             position: absolute;
-            width: 100%;
-            height: 2px;
-            bottom: 0;
+            bottom: -5px;
             left: 0;
-            background: linear-gradient(to right, var(--neon-blue), var(--neon-purple));
-            transform: scaleX(0);
-            transform-origin: bottom right;
-            transition: transform 0.3s;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            transition: width 0.3s ease;
         }
 
-        .nav-link:hover::after {
-            transform: scaleX(1);
-            transform-origin: bottom left;
+        .nav-link:hover::after, .nav-link.active::after {
+            width: 100%;
         }
 
-        .container {
-            margin-top: 30px;
+        /* Main Container */
+        .main-container {
+            padding-top: 30px;
         }
 
-        .card {
-            background-color: var(--card-bg);
-            border: 1px solid #333;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        /* Search Card */
+        .search-card {
+            background: rgba(15, 14, 19, 0.7);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
             overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            margin-bottom: 30px;
         }
 
         .card-header {
-            background-color: var(--card-secondary);
-            color: var(--neon-blue);
-            font-weight: 600;
-            border-bottom: 1px solid #444;
-            padding: 15px 20px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
 
-        .card-header i {
-            margin-right: 10px;
-            color: var(--neon-purple);
+        .header-title {
             font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--light);
+            display: flex;
+            align-items: center;
         }
 
+        .header-title i {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-right: 10px;
+            font-size: 1.4rem;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        /* Form Elements */
         .form-control {
-            background-color: var(--input-bg);
-            border: 1px solid var(--input-border);
-            color: white;
-            border-radius: 8px;
-            padding: 10px 15px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--light);
+            padding: 12px 15px;
+            font-size: 1rem;
+            border-radius: 10px;
+            transition: all 0.3s ease;
         }
 
         .form-control:focus {
-            background-color: #3a3a3a;
-            color: white;
-            border-color: var(--neon-blue);
-            box-shadow: 0 0 0 0.25rem rgba(0, 200, 255, 0.25);
+            background-color: rgba(255, 255, 255, 0.08);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.25);
+            color: var(--light);
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.4);
         }
 
         .form-select {
-            background-color: var(--input-bg);
-            border: 1px solid var(--input-border);
-            color: white;
-            border-radius: 8px;
-            padding: 10px 15px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--light);
+            padding: 12px 15px;
+            font-size: 1rem;
+            border-radius: 10px;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
         }
 
         .form-select:focus {
-            background-color: #3a3a3a;
-            color: white;
-            border-color: var(--neon-blue);
-            box-shadow: 0 0 0 0.25rem rgba(0, 200, 255, 0.25);
+            background-color: rgba(255, 255, 255, 0.08);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.25);
+            color: var(--light);
         }
 
-        .btn-neon {
-            background: linear-gradient(to right, var(--neon-blue), var(--neon-purple));
-            border: none;
-            border-radius: 8px;
-            color: white;
+        /* Buttons */
+        .btn {
+            padding: 12px 20px;
             font-weight: 600;
-            padding: 10px 20px;
+            border-radius: 10px;
             transition: all 0.3s ease;
-            box-shadow: 0 0 15px rgba(0, 200, 255, 0.3);
         }
 
-        .btn-neon:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0 20px rgba(0, 200, 255, 0.6);
+        .btn-primary {
+            background: linear-gradient(45deg, var(--primary), var(--primary-dark));
+            border: none;
+            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(108, 99, 255, 0.6);
+            background: linear-gradient(45deg, var(--primary), var(--primary-dark));
+        }
+
+        .btn-outline-primary {
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--primary);
             color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(108, 99, 255, 0.3);
         }
 
         .btn-sm {
-            padding: 5px 10px;
+            padding: 8px 15px;
             font-size: 0.85rem;
         }
 
-        .btn-outline-neon {
-            background: transparent;
-            border: 1px solid var(--neon-blue);
-            color: var(--neon-blue);
-        }
-
-        .btn-outline-neon:hover {
-            background: linear-gradient(to right, var(--neon-blue), var(--neon-purple));
-            color: white;
-        }
-
-        .alert-success {
-            background-color: rgba(0, 51, 0, 0.7);
-            color: #66ff66;
-            border-color: #005500;
-            border-radius: 8px;
-        }
-
-        .alert-danger {
-            background-color: rgba(51, 0, 0, 0.7);
-            color: #ff6666;
-            border-color: #550000;
-            border-radius: 8px;
-        }
-
+        /* Movie Grid */
         .movie-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 25px;
             margin-top: 20px;
         }
 
         .movie-card {
-            background-color: var(--card-bg);
-            border-radius: 10px;
+            background: rgba(15, 14, 19, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
             overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
             height: 100%;
             display: flex;
             flex-direction: column;
-            border: 1px solid #333;
         }
 
         .movie-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0, 200, 255, 0.2);
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(108, 99, 255, 0.3);
+            border-color: rgba(108, 99, 255, 0.3);
         }
 
         .movie-poster {
-            height: 300px;
-            background: linear-gradient(135deg, #333, #222);
             position: relative;
+            height: 375px;
             overflow: hidden;
         }
 
@@ -227,24 +250,60 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: transform 0.3s ease;
+            transition: transform 0.5s ease;
         }
 
         .movie-card:hover .movie-poster img {
             transform: scale(1.05);
         }
 
-        .movie-poster .poster-placeholder {
+        .poster-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(15, 14, 19, 0.9), transparent);
+            padding: 20px 15px;
+            transition: all 0.3s ease;
+        }
+
+        .movie-card:hover .poster-overlay {
+            background: linear-gradient(to top, rgba(108, 99, 255, 0.3), transparent);
+        }
+
+        .poster-placeholder {
+            height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #555;
-            font-size: 3rem;
-            height: 100%;
+            background: linear-gradient(135deg, rgba(15, 14, 19, 0.8), rgba(30, 28, 38, 0.8));
+            color: var(--gray);
+            font-size: 4rem;
+        }
+
+        .availability-indicator {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            z-index: 2;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .available {
+            background-color: var(--success);
+            box-shadow: 0 0 15px var(--success);
+        }
+
+        .unavailable {
+            background-color: var(--danger);
+            box-shadow: 0 0 15px var(--danger);
         }
 
         .movie-info {
-            padding: 15px;
+            padding: 20px;
             flex-grow: 1;
             display: flex;
             flex-direction: column;
@@ -252,125 +311,195 @@
 
         .movie-title {
             font-weight: 600;
-            margin-bottom: 5px;
             font-size: 1.1rem;
-            color: var(--text-primary);
+            margin-bottom: 5px;
+            color: var(--light);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.3;
         }
 
         .movie-subtitle {
             font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin-bottom: 10px;
+            color: var(--gray);
+            margin-bottom: 15px;
         }
 
         .movie-badges {
-            margin-bottom: 10px;
             display: flex;
             flex-wrap: wrap;
             gap: 5px;
+            margin-bottom: 15px;
+        }
+
+        .badge {
+            padding: 5px 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 8px;
         }
 
         .badge-blue {
             background: linear-gradient(to right, #0277bd, #00c8ff);
             color: white;
-            padding: 3px 8px;
-            border-radius: 5px;
-            font-size: 0.75rem;
-            font-weight: 600;
         }
 
         .badge-purple {
             background: linear-gradient(to right, #8a2be2, #ff00ff);
             color: white;
-            padding: 3px 8px;
-            border-radius: 5px;
-            font-size: 0.75rem;
-            font-weight: 600;
         }
 
         .badge-gold {
-            background: linear-gradient(to right, #ffa000, #ffcf40);
+            background: linear-gradient(to right, #FFC965, #FFAA00);
             color: #333;
-            padding: 3px 8px;
-            border-radius: 5px;
-            font-size: 0.75rem;
-            font-weight: 600;
         }
 
         .rating {
+            margin-top: auto;
             display: flex;
             align-items: center;
-            margin-top: auto;
-            padding-top: 10px;
-            border-top: 1px solid #333;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 15px;
         }
 
         .rating-stars {
-            color: #ffd700;
-            margin-right: 5px;
+            color: var(--warning);
+            margin-right: 8px;
         }
 
-        .card-actions {
+        .rating-value {
+            font-weight: 600;
+            color: var(--light);
+        }
+
+        .movie-actions {
             display: flex;
-            gap: 5px;
-            margin-top: 10px;
+            gap: 8px;
+            margin-top: 15px;
         }
 
-        .card-action-btn {
+        .movie-action-btn {
             flex: 1;
             text-align: center;
             padding: 8px;
-            border-radius: 5px;
-            transition: all 0.2s;
-            background-color: #333;
-            color: var(--text-primary);
-            text-decoration: none;
             font-size: 0.85rem;
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--gray);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .card-action-btn:hover {
-            background-color: #444;
-            color: var(--neon-blue);
+        .movie-action-btn:hover {
+            background-color: rgba(108, 99, 255, 0.1);
+            color: var(--primary);
+            transform: translateY(-2px);
         }
 
-        .card-action-btn i {
-            margin-right: 3px;
+        .movie-action-btn i {
+            margin-right: 5px;
         }
 
+        /* Empty State */
         .empty-state {
-            text-align: center;
             padding: 50px 20px;
+            text-align: center;
+            background: rgba(15, 14, 19, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .empty-state i {
+        .empty-icon {
             font-size: 4rem;
-            color: #444;
+            color: var(--gray);
             margin-bottom: 20px;
+            opacity: 0.5;
         }
 
-        .empty-message {
-            color: var(--text-secondary);
-            margin-bottom: 20px;
+        .empty-title {
+            font-size: 1.5rem;
+            color: var(--light);
+            margin-bottom: 10px;
         }
 
-        .availability-indicator {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 15px;
-            height: 15px;
-            border-radius: 50%;
-            z-index: 2;
+        .empty-subtitle {
+            color: var(--gray);
+            margin-bottom: 25px;
         }
 
-        .available {
-            background-color: #4CAF50;
-            box-shadow: 0 0 10px #4CAF50;
+        /* Alerts */
+        .alert {
+            border: none;
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            font-weight: 500;
         }
 
-        .unavailable {
-            background-color: #F44336;
-            box-shadow: 0 0 10px #F44336;
+        .alert-success {
+            background-color: rgba(75, 209, 160, 0.2);
+            color: var(--success);
+            border-left: 4px solid var(--success);
+        }
+
+        .alert-danger {
+            background-color: rgba(255, 107, 120, 0.2);
+            color: var(--danger);
+            border-left: 4px solid var(--danger);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 992px) {
+            .movie-grid {
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .movie-grid {
+                grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+                gap: 15px;
+            }
+
+            .movie-poster {
+                height: 280px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .movie-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 10px;
+            }
+
+            .movie-poster {
+                height: 240px;
+            }
+
+            .movie-title {
+                font-size: 1rem;
+            }
+
+            .movie-subtitle, .movie-action-btn {
+                font-size: 0.8rem;
+            }
         }
     </style>
 </head>
@@ -416,7 +545,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="<%= request.getContextPath() %>/rental/rental-history.jsp">
+                        <a class="nav-link" href="<%= request.getContextPath() %>/rental-history">
                             <i class="bi bi-collection-play"></i> My Rentals
                         </a>
                     </li>
@@ -425,18 +554,11 @@
                             <i class="bi bi-bookmark-star"></i> Watchlist
                         </a>
                     </li>
-                     <%
-                                        String currentUri = request.getRequestURI();
-                                        boolean isRecommendationPage = currentUri.contains("/recommendation/") ||
-                                                                      request.getServletPath().contains("recommendations") ||
-                                                                      request.getServletPath().contains("top-rated") ||
-                                                                      request.getServletPath().contains("genre-recommendations");
-                                    %>
-                                    <li class="nav-item">
-                                        <a class="nav-link <%= isRecommendationPage ? "active" : "" %>" href="<%= request.getContextPath() %>/view-recommendations">
-                                            <i class="bi bi-lightning-fill"></i> Recommendations
-                                        </a>
-                                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<%= request.getContextPath() %>/view-recommendations">
+                            <i class="bi bi-lightning-fill"></i> Recommendations
+                        </a>
+                    </li>
                 </ul>
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
@@ -454,7 +576,7 @@
         </div>
     </nav>
 
-    <div class="container">
+    <div class="container main-container">
         <!-- Flash messages -->
         <%
             // Check for messages from session
@@ -479,16 +601,18 @@
         %>
 
         <!-- Search Card -->
-        <div class="card">
+        <div class="search-card fade-in">
             <div class="card-header">
-                <div>
-                    <i class="bi bi-search"></i> Search Movies
+                <div class="header-title">
+                    <i class="bi bi-search"></i> Browse Movies
                 </div>
-                <a href="<%= request.getContextPath() %>/add-movie" class="btn btn-sm btn-neon">
-                    <i class="bi bi-plus-circle"></i> Add Movie
-                </a>
+                <div>
+                    <a href="<%= request.getContextPath() %>/add-movie" class="btn btn-primary btn-sm">
+                        <i class="bi bi-plus-circle"></i> Add Movie
+                    </a>
+                </div>
             </div>
-            <div class="card-body p-4">
+            <div class="card-body">
                 <form action="<%= request.getContextPath() %>/search-movie" method="get">
                     <div class="row g-3">
                         <div class="col-md-6">
@@ -503,7 +627,7 @@
                             </select>
                         </div>
                         <div class="col-md-2">
-                            <button type="submit" class="btn btn-neon w-100">
+                            <button type="submit" class="btn btn-primary w-100">
                                 <i class="bi bi-search"></i> Search
                             </button>
                         </div>
@@ -514,14 +638,13 @@
 
         <!-- Movies Grid -->
         <% if(movies.isEmpty()) { %>
-            <div class="card mt-4">
-                <div class="card-body empty-state">
-                    <i class="bi bi-film"></i>
-                    <p class="empty-message">No movies found</p>
-                    <a href="<%= request.getContextPath() %>/add-movie" class="btn btn-neon">
-                        <i class="bi bi-plus-circle"></i> Add a Movie
-                    </a>
-                </div>
+            <div class="empty-state fade-in">
+                <i class="bi bi-film empty-icon"></i>
+                <h2 class="empty-title">No movies found</h2>
+                <p class="empty-subtitle">Try adjusting your search or add a new movie to the collection</p>
+                <a href="<%= request.getContextPath() %>/add-movie" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Add a Movie
+                </a>
             </div>
         <% } else { %>
             <div class="movie-grid">
@@ -533,9 +656,9 @@
 
                     // Get cover photo URL if available
                     String coverPhotoUrl = movieManager.getCoverPhotoUrl(movie);
-                    boolean hasCoverPhoto = coverPhotoUrl != null && !coverPhotoUrl.isEmpty();
+                    boolean hasCoverPhoto = movie.getCoverPhotoPath() != null && !movie.getCoverPhotoPath().isEmpty();
                 %>
-                    <div class="movie-card">
+                    <div class="movie-card fade-in">
                         <div class="movie-poster">
                             <% if(hasCoverPhoto) { %>
                                 <img src="<%= request.getContextPath() %>/image-servlet?movieId=<%= movie.getMovieId() %>" alt="<%= movie.getTitle() %>">
@@ -545,21 +668,22 @@
                                 </div>
                             <% } %>
                             <div class="availability-indicator <%= movie.isAvailable() ? "available" : "unavailable" %>"></div>
+                            <div class="poster-overlay">
+                                <h5 class="movie-title"><%= movie.getTitle() %></h5>
+                                <p class="movie-subtitle">
+                                    <%= movie.getDirector() %> • <%= movie.getReleaseYear() %>
+                                </p>
+                            </div>
                         </div>
                         <div class="movie-info">
-                            <h3 class="movie-title"><%= movie.getTitle() %></h3>
-                            <p class="movie-subtitle">
-                                <%= movie.getDirector() %> &bull; <%= movie.getReleaseYear() %>
-                            </p>
-
                             <div class="movie-badges">
-                                <span class="badge-blue"><%= movie.getGenre() %></span>
+                                <span class="badge badge-blue"><%= movie.getGenre() %></span>
                                 <% if(isNewRelease) { %>
-                                    <span class="badge-purple">New Release</span>
+                                    <span class="badge badge-purple">New Release</span>
                                 <% } else if(isClassic) { %>
-                                    <span class="badge-purple">Classic</span>
+                                    <span class="badge badge-purple">Classic</span>
                                     <% if(hasAwards) { %>
-                                        <span class="badge-gold">Award Winner</span>
+                                        <span class="badge badge-gold">Award Winner</span>
                                     <% } %>
                                 <% } %>
                             </div>
@@ -585,17 +709,17 @@
                                         }
                                     %>
                                 </div>
-                                <span><%= movie.getRating() %>/10</span>
+                                <span class="rating-value"><%= movie.getRating() %>/10</span>
                             </div>
 
-                            <div class="card-actions">
-                                <a href="<%= request.getContextPath() %>/movie-details?id=<%= movie.getMovieId() %>" class="card-action-btn">
+                            <div class="movie-actions">
+                                <a href="<%= request.getContextPath() %>/movie-details?id=<%= movie.getMovieId() %>" class="movie-action-btn">
                                     <i class="bi bi-info-circle"></i> Details
                                 </a>
-                                <a href="<%= request.getContextPath() %>/update-movie?id=<%= movie.getMovieId() %>" class="card-action-btn">
+                                <a href="<%= request.getContextPath() %>/update-movie?id=<%= movie.getMovieId() %>" class="movie-action-btn">
                                     <i class="bi bi-pencil"></i> Edit
                                 </a>
-                                <a href="<%= request.getContextPath() %>/delete-movie?id=<%= movie.getMovieId() %>" class="card-action-btn">
+                                <a href="<%= request.getContextPath() %>/delete-movie?id=<%= movie.getMovieId() %>" class="movie-action-btn">
                                     <i class="bi bi-trash"></i> Delete
                                 </a>
                             </div>
@@ -606,6 +730,15 @@
         <% } %>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Fade in animation for elements
+        document.addEventListener('DOMContentLoaded', function() {
+            const fadeElements = document.querySelectorAll('.fade-in');
+            fadeElements.forEach((element, index) => {
+                element.style.animationDelay = `${index * 0.1}s`;
+            });
+        });
+    </script>
 </body>
 </html>

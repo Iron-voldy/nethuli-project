@@ -1,108 +1,69 @@
 package com.movierental.model.watchlist;
 
 import java.util.Date;
-import java.util.LinkedList;
+import java.util.Stack;
 
 /**
  * RecentlyWatched class implements a stack to manage recently watched movies
  */
 public class RecentlyWatched {
-    private String userId;
-    private LinkedList<String> movieIds;     // using LinkedList as a stack
-    private LinkedList<Date> watchDates;     // parallel stack for watch dates
-    private int maxSize;                     // maximum movies to keep track of
+    private Stack<String> movieIds;     // Stack for movie IDs
+    private Stack<Date> watchDates;     // Parallel stack for watch dates
+    private int maxSize;                // maximum movies to keep track of
 
     // Constructor
     public RecentlyWatched(String userId) {
-        this.userId = userId;
-        this.movieIds = new LinkedList<>();
-        this.watchDates = new LinkedList<>();
+        this.movieIds = new Stack<>();
+        this.watchDates = new Stack<>();
         this.maxSize = 10;  // default to track last 10 movies
     }
 
     // Constructor with customizable size
     public RecentlyWatched(String userId, int maxSize) {
-        this.userId = userId;
-        this.movieIds = new LinkedList<>();
-        this.watchDates = new LinkedList<>();
+        this.movieIds = new Stack<>();
+        this.watchDates = new Stack<>();
         this.maxSize = maxSize;
     }
 
-    // Getters and Setters
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    public int getMaxSize() {
-        return maxSize;
-    }
-
-    public void setMaxSize(int maxSize) {
-        this.maxSize = maxSize;
-    }
-
-    // Get all movie IDs in the recently watched list
-    public LinkedList<String> getMovieIds() {
-        return new LinkedList<>(movieIds);
-    }
-
-    // Get all watch dates
-    public LinkedList<Date> getWatchDates() {
-        return new LinkedList<>(watchDates);
-    }
-
-    // Add a movie to recently watched (implementing stack push)
+    // Add a movie to recently watched (push operation)
     public void addMovie(String movieId) {
-        // Check if movie is already in the list
+        // Remove existing entry if it exists
         int existingIndex = movieIds.indexOf(movieId);
-        if (existingIndex >= 0) {
-            // Remove existing entry
-            movieIds.remove(existingIndex);
-            watchDates.remove(existingIndex);
+        if (existingIndex != -1) {
+            // Remove the existing movie and its date
+            movieIds.removeElementAt(existingIndex);
+            watchDates.removeElementAt(existingIndex);
         }
 
-        // Add to the front (push)
-        movieIds.addFirst(movieId);
-        watchDates.addFirst(new Date());
+        // Push new movie to the top of the stack
+        movieIds.push(movieId);
+        watchDates.push(new Date());
 
-        // Check if we exceed maximum size
-        if (movieIds.size() > maxSize) {
-            // Remove last element
-            movieIds.removeLast();
-            watchDates.removeLast();
+        // Ensure stack doesn't exceed max size
+        while (movieIds.size() > maxSize) {
+            movieIds.removeElementAt(0);
+            watchDates.removeElementAt(0);
         }
     }
 
-    // Get the most recently watched movie (peek)
+    // Get the most recently watched movie (peek operation)
     public String getMostRecentMovie() {
         if (movieIds.isEmpty()) {
             return null;
         }
-        return movieIds.getFirst();
+        return movieIds.peek();
     }
 
-    // Get the date of the most recently watched movie
-    public Date getMostRecentWatchDate() {
-        if (watchDates.isEmpty()) {
-            return null;
-        }
-        return watchDates.getFirst();
-    }
-
-    // Remove the most recently watched movie (pop)
+    // Remove the most recently watched movie (pop operation)
     public String removeRecentMovie() {
         if (movieIds.isEmpty()) {
             return null;
         }
-        watchDates.removeFirst();
-        return movieIds.removeFirst();
+        watchDates.pop();
+        return movieIds.pop();
     }
 
-    // Check if a movie is in the recently watched list
+    // Check if a movie is in the recently watched stack
     public boolean contains(String movieId) {
         return movieIds.contains(movieId);
     }
@@ -116,12 +77,22 @@ public class RecentlyWatched {
         return null;
     }
 
-    // Get the number of movies in the recently watched list
+    // Get all movie IDs in the recently watched stack
+    public Stack<String> getMovieIds() {
+        return (Stack<String>) movieIds.clone();
+    }
+
+    // Get all watch dates
+    public Stack<Date> getWatchDates() {
+        return (Stack<Date>) watchDates.clone();
+    }
+
+    // Get the number of movies in the recently watched stack
     public int size() {
         return movieIds.size();
     }
 
-    // Clear the recently watched list
+    // Clear the recently watched stack
     public void clear() {
         movieIds.clear();
         watchDates.clear();
@@ -130,7 +101,7 @@ public class RecentlyWatched {
     // Convert to string representation for file storage
     public String toFileString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(userId).append(",").append(maxSize);
+        sb.append("userId").append(",").append(maxSize);
 
         for (int i = 0; i < movieIds.size(); i++) {
             sb.append(",").append(movieIds.get(i))
@@ -156,8 +127,8 @@ public class RecentlyWatched {
                     String movieId = parts[i];
                     Date watchDate = new Date(Long.parseLong(parts[i + 1]));
 
-                    recentlyWatched.movieIds.add(movieId);
-                    recentlyWatched.watchDates.add(watchDate);
+                    recentlyWatched.movieIds.push(movieId);
+                    recentlyWatched.watchDates.push(watchDate);
                 }
             }
 
