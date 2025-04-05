@@ -425,8 +425,15 @@
                             <i class="bi bi-bookmark-star"></i> Watchlist
                         </a>
                     </li>
-                    <li class="nav-item">
-                                        <a class="nav-link <%= currentPage.contains("/recommendation/") ? "active" : "" %>" href="<%= request.getContextPath() %>/view-recommendations">
+                     <%
+                                        String currentUri = request.getRequestURI();
+                                        boolean isRecommendationPage = currentUri.contains("/recommendation/") ||
+                                                                      request.getServletPath().contains("recommendations") ||
+                                                                      request.getServletPath().contains("top-rated") ||
+                                                                      request.getServletPath().contains("genre-recommendations");
+                                    %>
+                                    <li class="nav-item">
+                                        <a class="nav-link <%= isRecommendationPage ? "active" : "" %>" href="<%= request.getContextPath() %>/view-recommendations">
                                             <i class="bi bi-lightning-fill"></i> Recommendations
                                         </a>
                                     </li>
