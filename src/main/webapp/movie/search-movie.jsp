@@ -425,6 +425,11 @@
                             <i class="bi bi-bookmark-star"></i> Watchlist
                         </a>
                     </li>
+                    <li class="nav-item">
+                                        <a class="nav-link <%= currentPage.contains("/recommendation/") ? "active" : "" %>" href="<%= request.getContextPath() %>/view-recommendations">
+                                            <i class="bi bi-lightning-fill"></i> Recommendations
+                                        </a>
+                                    </li>
                 </ul>
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">

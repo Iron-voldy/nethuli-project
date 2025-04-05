@@ -215,6 +215,7 @@
                                 <i class="bi bi-person-circle me-2"></i><%= user.getUsername() %>
                             </a>
                         </li>
+
                     <% } %>
                 </ul>
             </div>
