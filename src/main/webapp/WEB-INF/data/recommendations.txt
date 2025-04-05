@@ -1,0 +1,9 @@
+PERSONAL_RECOMMENDATION,dae9bc23-f306-480d-be0e-213f24e61e77,221c6c6d-3004-4cf5-8fed-70aec2593b24,b1b9394e-3b56-4a45-bf30-e67954ba39bd,1743879582966,5.0,This is one of our highest-rated movies 1,top-rated,0.7
+GENERAL_RECOMMENDATION,98ec1f7c-bd39-4d18-b602-5372193f65d2,01853884-da4a-4e22-b5bd-149a94f9a33e,null,1743880039260,9.0,This movie is one of our top-rated films with a rating of 9.0,top-rated,1
+GENERAL_RECOMMENDATION,0b5b5975-9dc8-48fd-81ef-fe4995dc8618,eb969bd4-aed8-4c4b-aadb-ace057385eba,null,1743880039267,7.0,This movie is one of our top-rated films with a rating of 7.0,top-rated,2
+GENERAL_RECOMMENDATION,8da1edc0-d5fa-4dab-bcec-7fef67e24471,4c33b873-97ec-4ddd-b4c1-f42df820141e,null,1743880039267,5.0,This movie is one of our top-rated films with a rating of 5.0,top-rated,3
+GENERAL_RECOMMENDATION,5f4f9ec3-af78-4fb9-81c7-047b9f9098ad,221c6c6d-3004-4cf5-8fed-70aec2593b24,null,1743880039267,5.0,This movie is one of our top-rated films with a rating of 5.0,top-rated,4
+GENERAL_RECOMMENDATION,93d5c530-9b79-4be8-9961-dc8bf1fe9eaa,221c6c6d-3004-4cf5-8fed-70aec2593b24,null,1743880039267,5.0,This is one of the top-rated Action movies,genre-action,1
+GENERAL_RECOMMENDATION,b46b7f23-9208-4e06-b8b6-a84dd2cb0abe,eb969bd4-aed8-4c4b-aadb-ace057385eba,null,1743880039267,7.0,This is one of the top-rated Horror movies,genre-horror,1
+GENERAL_RECOMMENDATION,fcb7a28a-af01-460a-b809-bf6d6590113e,01853884-da4a-4e22-b5bd-149a94f9a33e,null,1743880039267,9.0,This is one of the top-rated Comedy movies,genre-comedy,1
+GENERAL_RECOMMENDATION,4b90d34d-bef4-411c-b14e-ab012e9634d0,4c33b873-97ec-4ddd-b4c1-f42df820141e,null,1743880039267,5.0,This is one of the top-rated Comedy movies,genre-comedy,2
