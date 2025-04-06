@@ -10,8 +10,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Movie - Movie Rental System</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Edit Movie - FilmFlux</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
         :root {
@@ -48,29 +50,186 @@
         .navbar-brand {
             font-weight: bold;
             background: linear-gradient(to right, var(--neon-blue), var(--neon-purple));
-            color: white;
-            font-weight: 700;
-            padding: 3px 15px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            margin-bottom: 15px;
-            display: inline-block;
-            box-shadow: 0 0 15px rgba(0, 200, 255, 0.3);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-size: 1.5rem;
+        }
+
+        .nav-link {
+            color: var(--text-primary);
+            margin: 0 10px;
+            position: relative;
+        }
+
+        .nav-link:hover {
+            color: var(--neon-blue);
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background: linear-gradient(to right, var(--neon-blue), var(--neon-purple));
+            transform: scaleX(0);
+            transform-origin: bottom right;
+            transition: transform 0.3s;
+        }
+
+        .nav-link:hover::after {
+            transform: scaleX(1);
+            transform-origin: bottom left;
+        }
+
+        .container {
+            margin-top: 30px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid #333;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background-color: var(--card-secondary);
+            color: var(--neon-blue);
+            font-weight: 600;
+            border-bottom: 1px solid #444;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .card-header i {
+            margin-right: 10px;
+            color: var(--neon-purple);
+            font-size: 1.2rem;
         }
 
         .edit-movie-title {
-            font-size: 1.6rem;
+            font-size: 1.8rem;
             font-weight: 600;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             color: var(--neon-blue);
             text-align: center;
         }
 
-        /* New styles for file upload */
+        .form-label {
+            color: var(--neon-blue);
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            background-color: var(--input-bg);
+            border: 1px solid var(--input-border);
+            color: white;
+            border-radius: 8px;
+            padding: 12px 15px;
+        }
+
+        .form-control:focus {
+            background-color: #3a3a3a;
+            color: white;
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 0 0.25rem rgba(0, 200, 255, 0.25);
+        }
+
+        .form-select {
+            background-color: var(--input-bg);
+            border: 1px solid var(--input-border);
+            color: white;
+            border-radius: 8px;
+            padding: 12px 15px;
+        }
+
+        .form-select:focus {
+            background-color: #3a3a3a;
+            color: white;
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 0 0.25rem rgba(0, 200, 255, 0.25);
+        }
+
+        .form-check-input {
+            background-color: var(--input-bg);
+            border: 1px solid var(--input-border);
+        }
+
+        .form-check-input:checked {
+            background-color: var(--neon-blue);
+            border-color: var(--neon-blue);
+        }
+
+        .form-text {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+
+        .btn-neon {
+            background: linear-gradient(to right, var(--neon-blue), var(--neon-purple));
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            padding: 12px 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 200, 255, 0.3);
+        }
+
+        .btn-neon:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 200, 255, 0.5);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(to right, #F44336, #FF5722);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            padding: 12px 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(244, 67, 54, 0.3);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(244, 67, 54, 0.5);
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: #333;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background-color: #444;
+            transform: translateY(-3px);
+        }
+
+        .alert-danger {
+            background-color: rgba(51, 0, 0, 0.7);
+            color: #ff6666;
+            border-color: #550000;
+            border-radius: 8px;
+        }
+
+        /* Cover photo preview styles */
         .cover-photo-preview {
             width: 100%;
             height: 300px;
-            border-radius: 8px;
+            border-radius: 10px;
             border: 2px dashed #444;
             display: flex;
             align-items: center;
@@ -113,13 +272,15 @@
             border: 1px solid var(--input-border);
             color: var(--text-primary);
             border-radius: 8px;
-            padding: 10px 15px;
+            padding: 12px 15px;
             text-align: center;
             cursor: pointer;
+            transition: all 0.3s;
         }
 
         .file-input-label:hover {
             background-color: #3a3a3a;
+            transform: translateY(-2px);
         }
 
         .file-input-label i {
@@ -127,7 +288,7 @@
         }
 
         .selected-file-name {
-            margin-top: 5px;
+            margin-top: 8px;
             font-size: 0.85rem;
             color: var(--text-secondary);
             overflow: hidden;
@@ -139,6 +300,33 @@
             font-size: 0.85rem;
             color: var(--text-secondary);
             margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .current-photo-info i {
+            margin-right: 5px;
+            color: var(--neon-blue);
+        }
+
+        .movie-type-section {
+            background: rgba(0, 200, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 25px 0;
+            border: 1px dashed #444;
+        }
+
+        .type-badge {
+            background: linear-gradient(to right, var(--neon-blue), var(--neon-purple));
+            color: white;
+            font-weight: 700;
+            padding: 3px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            display: inline-block;
+            box-shadow: 0 0 15px rgba(0, 200, 255, 0.3);
         }
     </style>
 </head>
@@ -204,12 +392,12 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="<%= request.getContextPath() %>/rental/rental-history.jsp">
+                        <a class="nav-link" href="<%= request.getContextPath() %>/rental-history">
                             <i class="bi bi-collection-play"></i> My Rentals
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="<%= request.getContextPath() %>/watchlist/watchlist.jsp">
+                        <a class="nav-link" href="<%= request.getContextPath() %>/view-watchlist">
                             <i class="bi bi-bookmark-star"></i> Watchlist
                         </a>
                     </li>
@@ -390,7 +578,8 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Handle cover photo preview
         document.addEventListener('DOMContentLoaded', function() {

@@ -1,4 +1,4 @@
 REGULAR,4c33b873-97ec-4ddd-b4c1-f42df820141e,Nelum Kuluna,Ilango Ramanathan,Comedy,2025,5.0,false,movie_images/4c33b873-97ec-4ddd-b4c1-f42df820141e.jpg
-NEW_RELEASE,01853884-da4a-4e22-b5bd-149a94f9a33e,Dragon,Ashwath Marimuthu,Comedy,2025,9.0,false,1740076200000,movie_images/01853884-da4a-4e22-b5bd-149a94f9a33e.jpg
+NEW_RELEASE,01853884-da4a-4e22-b5bd-149a94f9a33e,Dragon,Ashwath Marimuthu,Comedy,2025,5.0,false,1740076200000,movie_images/01853884-da4a-4e22-b5bd-149a94f9a33e.jpg
 REGULAR,eb969bd4-aed8-4c4b-aadb-ace057385eba,devi tamil movie,Ashvin A. Matthew,Horror,2016,7.0,true,movie_images/eb969bd4-aed8-4c4b-aadb-ace057385eba.jpg
 CLASSIC,221c6c6d-3004-4cf5-8fed-70aec2593b24,AÃÂoka,santhosh sivan,Action,2001,5.0,true,The 2001 Bollywood film "AÃÂoka" is a dramatized,false,movie_images/221c6c6d-3004-4cf5-8fed-70aec2593b24.jpg

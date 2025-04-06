@@ -8,8 +8,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rent Movie - Movie Rental System</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Rent Movie - FilmFlux</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
         :root {
@@ -88,7 +90,7 @@
             background-color: var(--card-bg);
             border: 1px solid #333;
             border-radius: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             overflow: hidden;
         }
@@ -115,7 +117,7 @@
         }
 
         .movie-title {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             font-weight: 600;
             margin-bottom: 5px;
             color: var(--text-primary);
@@ -128,11 +130,13 @@
 
         .movie-badge {
             display: inline-block;
-            padding: 3px 10px;
+            padding: 6px 14px;
             border-radius: 20px;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             font-weight: 600;
-            margin-right: 5px;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
         .badge-blue {
@@ -145,51 +149,32 @@
             color: white;
         }
 
-        .form-label {
-            color: var(--neon-blue);
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-        }
-
-        .form-control {
-            background-color: var(--input-bg);
-            border: 1px solid var(--input-border);
-            color: white;
-            border-radius: 8px;
-            padding: 10px 15px;
-        }
-
-        .form-control:focus {
-            background-color: #3a3a3a;
-            color: white;
-            border-color: var(--neon-blue);
-            box-shadow: 0 0 0 0.25rem rgba(0, 200, 255, 0.25);
-        }
-
         .btn-neon {
             background: linear-gradient(to right, var(--neon-blue), var(--neon-purple));
             border: none;
             border-radius: 8px;
             color: white;
             font-weight: 600;
-            padding: 10px 20px;
+            padding: 12px 20px;
             transition: all 0.3s ease;
             box-shadow: 0 0 15px rgba(0, 200, 255, 0.3);
         }
 
         .btn-neon:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0 20px rgba(0, 200, 255, 0.6);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 200, 255, 0.5);
             color: white;
         }
 
         .btn-secondary {
-            background-color: #444;
+            background-color: #333;
             border: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
 
         .btn-secondary:hover {
-            background-color: #555;
+            background-color: #444;
+            transform: translateY(-3px);
         }
 
         .alert-danger {
@@ -201,18 +186,19 @@
 
         .rental-details {
             background: rgba(0, 200, 255, 0.05);
-            border-radius: 10px;
-            padding: 20px;
+            border-radius: 12px;
+            padding: 25px;
             margin: 20px 0;
             border: 1px dashed #444;
         }
 
         .rental-price {
-            font-size: 1.8rem;
+            font-size: 2.5rem;
             font-weight: 700;
             color: var(--neon-blue);
             text-align: center;
             margin: 20px 0;
+            text-shadow: 0 0 10px rgba(0, 200, 255, 0.5);
         }
 
         .rental-days-selector {
@@ -226,18 +212,54 @@
             min-width: 45px;
         }
 
+        .btn-check:checked + .btn-outline-light {
+            background: linear-gradient(to right, var(--neon-blue), var(--neon-purple));
+            border-color: transparent;
+            box-shadow: 0 0 15px rgba(0, 200, 255, 0.4);
+        }
+
+        .btn-outline-light {
+            color: var(--text-primary);
+            border-color: #444;
+            background-color: var(--card-secondary);
+        }
+
+        .btn-outline-light:hover {
+            background-color: #444;
+            color: var(--text-primary);
+            border-color: #555;
+        }
+
         .rental-info {
             margin-top: 20px;
             color: var(--text-secondary);
-            font-size: 0.9rem;
+            font-size: 1rem;
+        }
+
+        .rental-info p {
+            margin-bottom: 8px;
+        }
+
+        .rental-info p i {
+            color: var(--neon-blue);
+            margin-right: 8px;
         }
 
         .rental-note {
-            margin-top: 15px;
+            margin-top: 20px;
             padding: 15px;
             background-color: rgba(255, 0, 255, 0.05);
             border-radius: 8px;
             border: 1px solid #444;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .rental-note i {
+            color: #ff9800;
+            margin-right: 10px;
+            font-size: 1.2rem;
+            margin-top: 2px;
         }
     </style>
 </head>
@@ -276,17 +298,17 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="<%= request.getContextPath() %>/search-movie">
+                        <a class="nav-link active" href="<%= request.getContextPath() %>/search-movie">
                             <i class="bi bi-film"></i> Movies
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="<%= request.getContextPath() %>/rental-history">
+                        <a class="nav-link" href="<%= request.getContextPath() %>/rental-history">
                             <i class="bi bi-collection-play"></i> My Rentals
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="<%= request.getContextPath() %>/watchlist/watchlist.jsp">
+                        <a class="nav-link" href="<%= request.getContextPath() %>/view-watchlist">
                             <i class="bi bi-bookmark-star"></i> Watchlist
                         </a>
                     </li>
@@ -364,16 +386,17 @@
                                 </div>
 
                                 <div class="rental-info">
-                                    <p>Base rental price is $<%= String.format("%.2f", movie.calculateRentalPrice(1)) %> per day.</p>
+                                    <p><i class="bi bi-info-circle"></i> Base rental price is $<%= String.format("%.2f", movie.calculateRentalPrice(1)) %> per day.</p>
                                     <% if(isNewRelease) { %>
-                                        <p><i class="bi bi-info-circle"></i> New releases have a premium rental rate.</p>
+                                        <p><i class="bi bi-star"></i> New releases have a premium rental rate.</p>
                                     <% } else if(isClassic) { %>
-                                        <p><i class="bi bi-info-circle"></i> Classic movies have a special rental pricing.</p>
+                                        <p><i class="bi bi-award"></i> Classic movies have a special rental pricing.</p>
                                     <% } %>
                                 </div>
 
                                 <div class="rental-note">
-                                    <p class="mb-0"><i class="bi bi-exclamation-circle me-2"></i> Late returns will incur additional fees. Please return the movie by the due date.</p>
+                                    <i class="bi bi-exclamation-circle"></i>
+                                    <p class="mb-0">Late returns will incur additional fees. Please return the movie by the due date.</p>
                                 </div>
                             </div>
 
@@ -392,7 +415,8 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Update price display based on rental days selection
         document.addEventListener('DOMContentLoaded', function() {

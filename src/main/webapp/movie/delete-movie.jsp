@@ -8,8 +8,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delete Movie - Movie Rental System</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Delete Movie - FilmFlux</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
         :root {
@@ -21,8 +23,8 @@
             --card-secondary: #2d2d2d;
             --text-primary: #e0e0e0;
             --text-secondary: #aaaaaa;
-            --input-bg: #333;
-            --input-border: #444;
+            --danger-color: #ff4d4d;
+            --danger-dark: #cc0000;
         }
 
         body {
@@ -62,6 +64,24 @@
             color: var(--neon-blue);
         }
 
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background: linear-gradient(to right, var(--neon-blue), var(--neon-purple));
+            transform: scaleX(0);
+            transform-origin: bottom right;
+            transition: transform 0.3s;
+        }
+
+        .nav-link:hover::after {
+            transform: scaleX(1);
+            transform-origin: bottom left;
+        }
+
         .container {
             margin-top: 30px;
         }
@@ -70,14 +90,14 @@
             background-color: var(--card-bg);
             border: 1px solid #333;
             border-radius: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             overflow: hidden;
         }
 
         .card-header {
             background-color: var(--card-secondary);
-            color: var(--neon-blue);
+            color: var(--danger-color);
             font-weight: 600;
             border-bottom: 1px solid #444;
             padding: 15px 20px;
@@ -87,7 +107,7 @@
 
         .card-header i {
             margin-right: 10px;
-            color: var(--neon-purple);
+            color: var(--danger-color);
             font-size: 1.2rem;
         }
 
@@ -97,7 +117,7 @@
         }
 
         .movie-title {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             font-weight: 600;
             margin-bottom: 5px;
             color: var(--text-primary);
@@ -108,67 +128,60 @@
             margin-bottom: 15px;
         }
 
-        .btn-neon {
-            background: linear-gradient(to right, var(--neon-blue), var(--neon-purple));
+        .btn-danger {
+            background: linear-gradient(to right, var(--danger-color), var(--danger-dark));
             border: none;
             border-radius: 8px;
             color: white;
             font-weight: 600;
-            padding: 10px 20px;
+            padding: 12px 20px;
             transition: all 0.3s ease;
-            box-shadow: 0 0 15px rgba(0, 200, 255, 0.3);
+            box-shadow: 0 0 15px rgba(255, 77, 77, 0.3);
         }
 
-        .btn-neon:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0 20px rgba(0, 200, 255, 0.6);
+        .btn-danger:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(255, 77, 77, 0.5);
             color: white;
         }
 
         .btn-secondary {
-            background-color: #444;
+            background-color: #333;
             border: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
 
         .btn-secondary:hover {
-            background-color: #555;
-        }
-
-        .btn-danger {
-            background: linear-gradient(to right, #F44336, #FF5722);
-            border: none;
-            border-radius: 8px;
-            color: white;
-            font-weight: 600;
-            padding: 10px 20px;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 15px rgba(244, 67, 54, 0.3);
-        }
-
-        .btn-danger:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0 20px rgba(244, 67, 54, 0.6);
-            color: white;
+            background-color: #444;
+            transform: translateY(-3px);
         }
 
         .delete-warning {
-            background-color: rgba(244, 67, 54, 0.1);
-            border: 1px solid rgba(244, 67, 54, 0.3);
-            border-radius: 8px;
-            padding: 20px;
+            background-color: rgba(255, 77, 77, 0.1);
+            border: 1px solid rgba(255, 77, 77, 0.3);
+            border-radius: 12px;
+            padding: 30px;
             margin: 20px 0;
             text-align: center;
         }
 
         .delete-warning i {
-            font-size: 3rem;
-            color: #F44336;
-            margin-bottom: 15px;
+            font-size: 4rem;
+            color: var(--danger-color);
+            margin-bottom: 20px;
+            display: block;
         }
 
         .delete-warning h3 {
-            color: #F44336;
+            color: var(--danger-color);
             margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .delete-warning p {
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            margin-bottom: 0;
         }
     </style>
 </head>
@@ -277,6 +290,7 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
