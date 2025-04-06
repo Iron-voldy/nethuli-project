@@ -13,29 +13,172 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recommendations - Movie Rental System</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+    <style>
+        :root {
+            --primary-color: #6C63FF;
+            --secondary-color: #FF6584;
+            --background-dark: #121212;
+            --card-background: #1E1E1E;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B0B0B0;
+            --accent-color: #00C8FF;
+        }
+
+        body {
+            background-color: var(--background-dark);
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        .recommendations-header {
+            background: linear-gradient(135deg, rgba(108, 99, 255, 0.1), rgba(255, 101, 132, 0.1));
+            padding: 4rem 0;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .recommendations-header h1 {
+            font-weight: 700;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .recommendations-nav {
+            background-color: rgba(30,30,30,0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .nav-pills .nav-link {
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+        }
+
+        .nav-pills .nav-link.active {
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+
+        .recommendation-card {
+            background-color: var(--card-background);
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+        }
+
+        .recommendation-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        }
+
+        .recommendation-card-image {
+            height: 250px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .recommendation-card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .recommendation-card:hover .recommendation-card-image img {
+            transform: scale(1.1);
+        }
+
+        .recommendation-card-body {
+            padding: 1.5rem;
+        }
+
+        .recommendation-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+
+        .btn-recommendation {
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            border: none;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .btn-recommendation:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(108, 99, 255, 0.3);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 0;
+            background-color: var(--card-background);
+            border-radius: 10px;
+        }
+
+        .genre-filter {
+            background-color: rgba(30,30,30,0.5);
+            backdrop-filter: blur(10px);
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+
+        .genre-badge {
+            background-color: rgba(255,255,255,0.1);
+            color: var(--text-secondary);
+            margin: 0 5px 10px 0;
+            transition: all 0.3s ease;
+        }
+
+        .genre-badge:hover, .genre-badge.active {
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .recommendations-header {
+                padding: 2rem 0;
+            }
+        }
+    </style>
 </head>
 <body>
     <%
-        // Get user from session
-        User user = (User) request.getSession(false).getAttribute("user");
+        // Session and authentication check
+        User user = (User) session.getAttribute("user");
         if (user == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
-        // Get data from request attributes
-        List<Recommendation> recommendations = (List<Recommendation>) request.getAttribute("recommendations");
-        Map<String, Movie> movieMap = (Map<String, Movie>) request.getAttribute("movieMap");
-        String recommendationType = (String) request.getAttribute("recommendationType");
-        List<String> allGenres = (List<String>) request.getAttribute("allGenres");
+        // Get recommendation data
+        List<Recommendation> recommendations = null;
+        Map<String, Movie> movieMap = null;
+        String recommendationType = null;
+        List<String> allGenres = null;
 
-        // Check if recommendations are personalized
-        boolean isPersonal = "personal".equals(recommendationType);
+        recommendations = (List<Recommendation>) request.getAttribute("recommendations");
+        movieMap = (Map<String, Movie>) request.getAttribute("movieMap");
+        recommendationType = (String) request.getAttribute("recommendationType");
+        allGenres = (List<String>) request.getAttribute("allGenres");
 
-        // Date formatter
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MMMM dd, yyyy");
+        boolean isPersonal = recommendationType != null && recommendationType.equals("personal");
     %>
 
     <!-- Navigation Bar -->
@@ -45,15 +188,15 @@
         <!-- Flash messages -->
         <%
             // Check for messages from session
-            String successMessage = (String) request.getSession().getAttribute("successMessage");
-            String errorMessage = (String) request.getSession().getAttribute("errorMessage");
+            String successMessage = (String) session.getAttribute("successMessage");
+            String errorMessage = (String) session.getAttribute("errorMessage");
 
             if(successMessage != null) {
                 out.println("<div class='alert alert-success'>");
                 out.println("<i class='bi bi-check-circle-fill me-2'></i>");
                 out.println(successMessage);
                 out.println("</div>");
-                request.getSession().removeAttribute("successMessage");
+                session.removeAttribute("successMessage");
             }
 
             if(errorMessage != null) {
@@ -61,7 +204,7 @@
                 out.println("<i class='bi bi-exclamation-triangle-fill me-2'></i>");
                 out.println(errorMessage);
                 out.println("</div>");
-                request.getSession().removeAttribute("errorMessage");
+                session.removeAttribute("errorMessage");
             }
         %>
 
@@ -107,114 +250,128 @@
             </div>
         </div>
 
-        <!-- Recommendations Grid -->
-        <% if (recommendations == null || recommendations.isEmpty()) { %>
-            <div class="text-center p-5">
-                <i class="bi bi-lightning display-1 text-muted"></i>
-                <p class="text-muted mt-3">No recommendations available</p>
-                <a href="<%= request.getContextPath() %>/generate-recommendations?type=<%= recommendationType %>" class="btn btn-primary">
-                    <i class="bi bi-arrow-repeat"></i> Generate Recommendations
-                </a>
-            </div>
-        <% } else { %>
-            <div class="row">
-                <% for (Recommendation recommendation : recommendations) {
-                    Movie movie = movieMap.get(recommendation.getMovieId());
-                    if (movie != null) {
-                        double relevanceScore = 0.0;
-                        String baseSource = "";
-
-                        if (recommendation instanceof PersonalRecommendation) {
-                            PersonalRecommendation pr = (PersonalRecommendation) recommendation;
-                            relevanceScore = pr.getRelevanceScore();
-                            baseSource = pr.getBaseSource();
-                        }
-                %>
-                    <div class="col-md-4 col-lg-3 mb-4">
-                        <div class="card h-100">
-                            <div class="card-img-top bg-dark text-center" style="height: 200px;">
-                                <% if (movie.getCoverPhotoPath() != null && !movie.getCoverPhotoPath().isEmpty()) { %>
-                                    <img src="<%= request.getContextPath() %>/image-servlet?movieId=<%= movie.getMovieId() %>"
-                                        alt="<%= movie.getTitle() %>" style="height: 100%; object-fit: cover;">
-                                <% } else { %>
-                                    <i class="bi bi-film text-muted" style="font-size: 5rem; margin-top: 60px;"></i>
-                                <% } %>
-                            </div>
-                            <div class="card-body d-flex flex-column">
-                                <h5 class="card-title"><%= movie.getTitle() %></h5>
-                                <p class="card-text text-muted">
-                                    <%= movie.getDirector() %> • <%= movie.getReleaseYear() %>
-                                </p>
-
-                                <% if (isPersonal) { %>
-                                    <span class="badge bg-primary mb-2">
-                                        <i class="bi bi-bullseye"></i>
-                                        <%= Math.round(relevanceScore * 100) %>% Match
-                                    </span>
-                                <% } %>
-
-                                <div class="mb-2">
-                                    <%
-                                        // Display stars based on rating
-                                        double rating = movie.getRating();
-                                        int fullStars = (int) Math.floor(rating / 2);
-                                        boolean halfStar = (rating / 2) - fullStars >= 0.5;
-
-                                        for (int i = 0; i < fullStars; i++) {
-                                            out.print("<i class='bi bi-star-fill text-warning'></i> ");
-                                        }
-
-                                        if (halfStar) {
-                                            out.print("<i class='bi bi-star-half text-warning'></i> ");
-                                        }
-
-                                        int emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
-                                        for (int i = 0; i < emptyStars; i++) {
-                                            out.print("<i class='bi bi-star text-warning'></i> ");
-                                        }
-                                    %>
-                                    <span class="ms-1"><%= movie.getRating() %>/10</span>
-                                </div>
-
-                                <div class="card-text bg-light p-2 rounded mb-3 flex-grow-1">
-                                    "<%= recommendation.getReason() %>"
-                                </div>
-
-                                <div class="d-flex gap-1 mt-auto">
-                                    <a href="<%= request.getContextPath() %>/movie-details?id=<%= movie.getMovieId() %>" class="btn btn-sm btn-outline-primary flex-grow-1">
-                                        <i class="bi bi-info-circle"></i> Details
-                                    </a>
-                                    <a href="<%= request.getContextPath() %>/add-to-watchlist?movieId=<%= movie.getMovieId() %>" class="btn btn-sm btn-outline-secondary flex-grow-1">
-                                        <i class="bi bi-bookmark-plus"></i> Watchlist
-                                    </a>
-                                    <% if (movie.isAvailable()) { %>
-                                        <a href="<%= request.getContextPath() %>/rent-movie?id=<%= movie.getMovieId() %>" class="btn btn-sm btn-outline-success flex-grow-1">
-                                            <i class="bi bi-cart-plus"></i> Rent
-                                        </a>
-                                    <% } %>
-                                </div>
-                            </div>
-                        </div>
+        <!-- Recommendations Section -->
+        <div class="container">
+            <% if (recommendations == null || recommendations.isEmpty()) { %>
+                <div class="recommendation-container">
+                    <div class="recommendation-empty-state">
+                        <i class="bi bi-lightning recommendation-empty-state-icon"></i>
+                        <h3 class="recommendation-empty-state-title">No Recommendations Available</h3>
+                        <p class="recommendation-empty-state-subtitle">We'll find some great movies for you soon!</p>
+                        <a href="<%= request.getContextPath() %>/generate-recommendations?type=<%= recommendationType != null ? recommendationType : "general" %>"
+                           class="btn recommendation-generate-btn">
+                            <i class="bi bi-arrow-repeat"></i> Generate Recommendations
+                        </a>
                     </div>
-                <%
-                    }
-                }
-                %>
-            </div>
+                </div>
+            <% } else { %>
+                <div class="recommendation-container">
+                    <div class="row g-4">
+                        <%
+                        for (Recommendation recommendation : recommendations) {
+                            Movie movie = movieMap.get(recommendation.getMovieId());
+                            if (movie != null) {
+                                double relevanceScore = 0.0;
+                                String baseSource = "";
+
+                                if (recommendation instanceof PersonalRecommendation) {
+                                    PersonalRecommendation pr = (PersonalRecommendation) recommendation;
+                                    relevanceScore = pr.getRelevanceScore();
+                                    baseSource = pr.getBaseSource();
+                                }
+                        %>
+                            <div class="col-md-4 col-lg-3">
+                                <div class="recommendation-card">
+                                    <div class="recommendation-card-image">
+                                        <% if (movie.getCoverPhotoPath() != null && !movie.getCoverPhotoPath().isEmpty()) { %>
+                                            <img src="<%= request.getContextPath() %>/image-servlet?movieId=<%= movie.getMovieId() %>"
+                                                 alt="<%= movie.getTitle() %>">
+                                        <% } else { %>
+                                            <div class="recommendation-card-image-placeholder">
+                                                <i class="bi bi-film"></i>
+                                            </div>
+                                        <% } %>
+                                    </div>
+                                    <div class="recommendation-card-body">
+                                        <h5 class="recommendation-card-title"><%= movie.getTitle() %></h5>
+                                        <p class="recommendation-card-subtitle">
+                                            <%= movie.getDirector() %> • <%= movie.getReleaseYear() %>
+                                        </p>
+
+                                        <% if (isPersonal) { %>
+                                            <div class="recommendation-match-badge">
+                                                <i class="bi bi-bullseye"></i>
+                                                <%= Math.round(relevanceScore * 100) %>% Match
+                                            </div>
+                                        <% } %>
+
+                                        <div class="recommendation-rating">
+                                            <div class="recommendation-rating-stars">
+                                                <%
+                                                    double rating = movie.getRating();
+                                                    int fullStars = (int) Math.floor(rating / 2);
+                                                    boolean halfStar = (rating / 2) - fullStars >= 0.5;
+
+                                                    for (int i = 0; i < fullStars; i++) {
+                                                        out.print("<i class='bi bi-star-fill'></i>");
+                                                    }
+
+                                                    if (halfStar) {
+                                                        out.print("<i class='bi bi-star-half'></i>");
+                                                    }
+
+                                                    int emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+                                                    for (int i = 0; i < emptyStars; i++) {
+                                                        out.print("<i class='bi bi-star'></i>");
+                                                    }
+                                                %>
+                                            </div>
+                                            <span class="recommendation-rating-value"><%= movie.getRating() %>/10</span>
+                                        </div>
+
+                                        <div class="recommendation-reason">
+                                            "<%= recommendation.getReason() %>"
+                                        </div>
+
+                                        <div class="recommendation-actions">
+                                            <a href="<%= request.getContextPath() %>/movie-details?id=<%= movie.getMovieId() %>"
+                                               class="btn btn-sm recommendation-action-btn">
+                                                <i class="bi bi-info-circle"></i> Details
+                                            </a>
+                                            <a href="<%= request.getContextPath() %>/add-to-watchlist?movieId=<%= movie.getMovieId() %>"
+                                               class="btn btn-sm recommendation-action-btn">
+                                                <i class="bi bi-bookmark-plus"></i> Watchlist
+                                            </a>
+                                            <% if (movie.isAvailable()) { %>
+                                                <a href="<%= request.getContextPath() %>/rent-movie?id=<%= movie.getMovieId() %>"
+                                                   class="btn btn-sm recommendation-action-btn">
+                                                    <i class="bi bi-cart-plus"></i> Rent
+                                                </a>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <%
+                            }
+                        }
+                        %>
+                    </div>
+                </div>
+            <% } %>
 
             <div class="text-center my-4">
                 <a href="<%= request.getContextPath() %>/generate-recommendations?type=<%= recommendationType %>" class="btn btn-primary">
-                    <i class="bi bi-arrow-repeat"></i> Refresh Recommendations
-                </a>
-                <% if (isPersonal) { %>
-                    <a href="<%= request.getContextPath() %>/recommendation-action?action=clear-personal" class="btn btn-outline-danger ms-2">
-                        <i class="bi bi-trash"></i> Clear Recommendations
-                    </a>
-                <% } %>
-            </div>
-        <% } %>
-    </div>
+                                                                                     <i class="bi bi-arrow-repeat"></i> Refresh Recommendations
+                                                                                 </a>
+                                                                                 <% if (isPersonal) { %>
+                                                                                     <a href="<%= request.getContextPath() %>/recommendation-action?action=clear-personal" class="btn btn-outline-danger ms-2">
+                                                                                         <i class="bi bi-trash"></i> Clear Recommendations
+                                                                                     </a>
+                                                                                 <% } %>
+                                                                                 </div>
+                                                                                 </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+                                                                                 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+                                                                                 </body>
+                                                                                 </html>

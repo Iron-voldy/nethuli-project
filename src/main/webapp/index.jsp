@@ -458,7 +458,7 @@
                     </div>
                 </div>
                 <div class="col-lg-6">
-                    <img src="https://cdn.pixabay.com/photo/2018/11/13/21/43/fantasy-3814057_1280.png" alt="Hero Image" class="img-fluid hero-image">
+                    <img src="./includes/sideImg.png" alt="Hero Image" class="img-fluid hero-image">
                 </div>
             </div>
         </div>
