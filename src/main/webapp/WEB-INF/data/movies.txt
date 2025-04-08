@@ -1,6 +1,6 @@
-NEW_RELEASE,01853884-da4a-4e22-b5bd-149a94f9a33e,Dragon,Ashwath Marimuthu,Comedy,2025,5.0,true,1740076200000,movie_images/01853884-da4a-4e22-b5bd-149a94f9a33e.jpg
+NEW_RELEASE,01853884-da4a-4e22-b5bd-149a94f9a33e,Dragon,Ashwath Marimuthu,Comedy,2025,4.5,false,1740076200000,movie_images/01853884-da4a-4e22-b5bd-149a94f9a33e.jpg
 REGULAR,eb969bd4-aed8-4c4b-aadb-ace057385eba,devi tamil movie,Ashvin A. Matthew,Horror,2016,7.0,true,movie_images/eb969bd4-aed8-4c4b-aadb-ace057385eba.jpg
-CLASSIC,221c6c6d-3004-4cf5-8fed-70aec2593b24,AÃÂoka,santhosh sivan,Action,2001,5.0,true,The 2001 Bollywood film "AÃÂoka" is a dramatized,false,movie_images/221c6c6d-3004-4cf5-8fed-70aec2593b24.jpg
+CLASSIC,221c6c6d-3004-4cf5-8fed-70aec2593b24,AÃÂoka,santhosh sivan,Action,2001,5.0,false,The 2001 Bollywood film "AÃÂoka" is a dramatized,false,movie_images/221c6c6d-3004-4cf5-8fed-70aec2593b24.jpg
 NEW_RELEASE,8177158a-b433-424a-811e-595296a40e84,The Monkey (2025),Stephen King,Horror,2025,6.7,true,1743791400000,movie_images/8177158a-b433-424a-811e-595296a40e84.jpg
 REGULAR,3fdfe164-22de-48c8-88f5-076147760a4c,The Electric State (2025),Simon Staleenhag,Action,2025,9.9,true,movie_images/3fdfe164-22de-48c8-88f5-076147760a4c.jpg
 REGULAR,2a2a9db4-c725-4b4c-bc76-760aec2edbc9,L2: Empuraan (2025),Prithviraj Sukumaran,Action,2025,9.5,true,movie_images/2a2a9db4-c725-4b4c-bc76-760aec2edbc9.jpg

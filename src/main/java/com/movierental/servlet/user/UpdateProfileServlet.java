@@ -38,7 +38,7 @@ public class UpdateProfileServlet extends HttpServlet {
         String userId = (String) session.getAttribute("userId");
 
         // Create UserManager and get user
-        UserManager userManager = new UserManager();
+        UserManager userManager = new UserManager(getServletContext());
         User user = userManager.getUserById(userId);
 
         if (user == null) {
@@ -73,7 +73,7 @@ public class UpdateProfileServlet extends HttpServlet {
         String userId = (String) session.getAttribute("userId");
 
         // Create UserManager and get user
-        UserManager userManager = new UserManager();
+        UserManager userManager = new UserManager(getServletContext());
         User user = userManager.getUserById(userId);
 
         if (user == null) {
@@ -93,7 +93,7 @@ public class UpdateProfileServlet extends HttpServlet {
 
         // Check if current password is correct if they want to change password
         if (newPassword != null && !newPassword.trim().isEmpty()) {
-            if (!user.authenticate(currentPassword)) {
+            if (currentPassword == null || !user.authenticate(currentPassword)) {
                 request.setAttribute("errorMessage", "Current password is incorrect");
                 request.setAttribute("user", user);
                 request.getRequestDispatcher("/user/update-profile.jsp").forward(request, response);

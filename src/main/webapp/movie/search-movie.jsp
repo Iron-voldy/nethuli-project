@@ -555,6 +555,11 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                    <a class="nav-link"  href="<%= request.getContextPath() %>/user-reviews">
+                        <i class="bi bi-star"></i> My Reviews
+                    </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="<%= request.getContextPath() %>/view-recommendations">
                             <i class="bi bi-lightning-fill"></i> Recommendations
                         </a>

@@ -11,6 +11,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
+        /* Your existing CSS styles */
         :root {
             --neon-purple: #8a2be2;
             --neon-pink: #ff00ff;
@@ -263,24 +264,24 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="<%= request.getContextPath() %>/movie/search-movie.jsp">
+                        <a class="nav-link" href="<%= request.getContextPath() %>/search-movie">
                             <i class="bi bi-film"></i> Movies
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="<%= request.getContextPath() %>/rental/rental-history.jsp">
+                        <a class="nav-link" href="<%= request.getContextPath() %>/rental-history">
                             <i class="bi bi-collection-play"></i> My Rentals
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="<%= request.getContextPath() %>/watchlist/watchlist.jsp">
+                        <a class="nav-link" href="<%= request.getContextPath() %>/view-watchlist">
                             <i class="bi bi-bookmark-star"></i> Watchlist
                         </a>
                     </li>
                 </ul>
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link active" href="<%= request.getContextPath() %>/user/profile.jsp">
+                        <a class="nav-link active" href="#">
                             <i class="bi bi-person-circle"></i> <%= user.getUsername() %>
                         </a>
                     </li>
@@ -416,7 +417,7 @@
                         <div class="text-center py-5">
                             <i class="bi bi-film" style="font-size: 3rem; color: #444;"></i>
                             <p class="mt-3 text-secondary">You haven't rented any movies yet</p>
-                            <a href="<%= request.getContextPath() %>/movie/search-movie.jsp" class="btn btn-neon mt-2">
+                            <a href="<%= request.getContextPath() %>/search-movie" class="btn btn-neon mt-2">
                                 <i class="bi bi-search"></i> Browse Movies
                             </a>
                         </div>
@@ -432,8 +433,8 @@
                         <div class="text-center py-5">
                             <i class="bi bi-chat-square-text" style="font-size: 3rem; color: #444;"></i>
                             <p class="mt-3 text-secondary">You haven't written any reviews yet</p>
-                            <a href="<%= request.getContextPath() %>/review/add-review.jsp" class="btn btn-neon mt-2">
-                                <i class="bi bi-pencil"></i> Write a Review
+                            <a href="<%= request.getContextPath() %>/user-reviews" class="btn btn-neon mt-2">
+                                <i class="bi bi-pencil"></i> View Your Reviews
                             </a>
                         </div>
                     </div>
@@ -448,8 +449,8 @@
                         <div class="text-center py-5">
                             <i class="bi bi-bookmarks" style="font-size: 3rem; color: #444;"></i>
                             <p class="mt-3 text-secondary">Your watchlist is empty</p>
-                            <a href="<%= request.getContextPath() %>/watchlist/watchlist.jsp" class="btn btn-neon mt-2">
-                                <i class="bi bi-plus-circle"></i> Add to Watchlist
+                            <a href="<%= request.getContextPath() %>/view-watchlist" class="btn btn-neon mt-2">
+                                <i class="bi bi-plus-circle"></i> Manage Watchlist
                             </a>
                         </div>
                     </div>

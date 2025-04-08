@@ -40,8 +40,8 @@ public class ReturnMovieServlet extends HttpServlet {
             return;
         }
 
-        // Get transaction from database
-        RentalManager rentalManager = new RentalManager();
+        // Get transaction from database - use ServletContext here
+        RentalManager rentalManager = new RentalManager(getServletContext());
         Transaction transaction = rentalManager.getTransactionById(transactionId);
 
         if (transaction == null) {
@@ -64,8 +64,8 @@ public class ReturnMovieServlet extends HttpServlet {
             return;
         }
 
-        // Get movie details
-        MovieManager movieManager = new MovieManager();
+        // Get movie details - use ServletContext here
+        MovieManager movieManager = new MovieManager(getServletContext());
         Movie movie = movieManager.getMovieById(transaction.getMovieId());
 
         // Set transaction and movie in request attributes
@@ -107,8 +107,8 @@ public class ReturnMovieServlet extends HttpServlet {
             return;
         }
 
-        // Get transaction from database
-        RentalManager rentalManager = new RentalManager();
+        // Get transaction from database - use ServletContext here
+        RentalManager rentalManager = new RentalManager(getServletContext());
         Transaction transaction = rentalManager.getTransactionById(transactionId);
 
         if (transaction == null) {
@@ -130,8 +130,8 @@ public class ReturnMovieServlet extends HttpServlet {
             return;
         }
 
-        // Get movie details for success message
-        MovieManager movieManager = new MovieManager();
+        // Get movie details for success message - use ServletContext here
+        MovieManager movieManager = new MovieManager(getServletContext());
         Movie movie = movieManager.getMovieById(transaction.getMovieId());
         String movieTitle = (movie != null) ? movie.getTitle() : "Unknown movie";
 
