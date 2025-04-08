@@ -142,6 +142,7 @@ public class AdminManager {
         }
     }
 
+
     // Add a new admin
     public boolean addAdmin(Admin admin) {
         try {
